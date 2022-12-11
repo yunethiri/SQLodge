@@ -15,11 +15,13 @@ const EditView = () => {
         'time': 'TIME',
     }
 
+    const fieldTypes = Object.keys(dataTypes)
+
     const [fieldRows, setFieldRows] = useState<Array<FieldRow>>([
         {
-            id: 0,
+            id: 1,
             fieldName: "",
-            fieldType: Object.keys(dataTypes)[0],
+            fieldType: fieldTypes[0],
         }
     ])
 
@@ -30,12 +32,16 @@ const EditView = () => {
                 {
                     fieldRows.map(fieldRow => (
                         <FieldRowView
-                            key={fieldRow.id}
                             id={fieldRow.id}
-                            showDelete={false}
-                            dataTypes={Object.keys(dataTypes)}
+                            fieldName={fieldRow.fieldName}
+                            fieldType={fieldRow.fieldType}
+                            onFieldNameEdit={handleFieldNameEdit}
+                            onFieldTypeEdit={handleFieldTypeEdit}
                             onFieldAddition={handleFieldRowAddition}
-                            onFieldUpdate={handleFieldUpdate}
+                            onFieldDeletion={handleFieldRowDeletion}
+                            showDelete={fieldRows.length > 1}
+                            dataTypes={fieldTypes}
+                            key={fieldRow.id}
                         />
                     ))
                 }
@@ -44,17 +50,43 @@ const EditView = () => {
     )
 
     function handleFieldRowAddition(id: number) {
-
-    }
-
-    function handleFieldUpdate(id: number, fieldName: string, fieldType: string) {
         let _fieldRows = [...fieldRows]
         let idx = _fieldRows.findIndex(fieldRow => fieldRow.id === id)
-        if (idx !== null) {
-            _fieldRows[idx].fieldName = fieldName
-            _fieldRows[idx].fieldType = fieldType
+        let newId = _fieldRows.length + 1
+        let newRow: FieldRow = {
+            fieldName: "",
+            fieldType: fieldTypes[0],
+            id: newId
         }
+        _fieldRows.splice(idx + 1, 0, newRow)
         setFieldRows(_fieldRows)
+    }
+
+
+    function handleFieldRowDeletion(id: number) {
+        let _fieldRows = [...fieldRows]
+        let idx = _fieldRows.findIndex(fieldRow => fieldRow.id === id)
+        _fieldRows.splice(idx, 1)
+        setFieldRows(_fieldRows)
+    }
+
+    function handleFieldNameEdit(id: number, fieldName: string) {
+        let _fieldRows = [...fieldRows]
+        let idx = _fieldRows.findIndex(fieldRow => fieldRow.id === id)
+        _fieldRows[idx].fieldName = fieldName
+
+        setFieldRows(_fieldRows)
+
+        console.table(_fieldRows)
+    }
+
+    function handleFieldTypeEdit(id: number, fieldType: string) {
+        let _fieldRows = [...fieldRows]
+        let idx = _fieldRows.findIndex(fieldRow => fieldRow.id === id)
+        _fieldRows[idx].fieldType = fieldType
+
+        setFieldRows(_fieldRows)
+
         console.table(_fieldRows)
     }
 }
