@@ -3,6 +3,8 @@ import FieldRowView from "./FieldRowView"
 import * as api from '../api'
 import { RelationView } from "../App"
 
+export type StringMap = { [dtype: string]: string }
+
 interface FieldRow {
     id: number
     fieldName: string
@@ -14,8 +16,9 @@ interface EditViewProps {
     onRelationChange: (relationView: RelationView) => void
 }
 
+
 const EditView = (props: EditViewProps) => {
-    const dataTypes: { [dtype: string]: string } = {
+    const dataTypes: StringMap = {
         'boolean': 'BOOL',
         'integer': 'INT',
         'text': 'TEXT',
@@ -24,6 +27,9 @@ const EditView = (props: EditViewProps) => {
 
     const fieldTypes = Object.keys(dataTypes)
 
+    const [showDefinitionField, setShowDefinitionField] = useState<boolean>(true)
+
+
     const [fieldRows, setFieldRows] = useState<Array<FieldRow>>([
         {
             id: 1,
@@ -31,87 +37,97 @@ const EditView = (props: EditViewProps) => {
             fieldType: fieldTypes[0],
         }
     ])
-
-
     const [relationName, setRelationName] = useState<string>("")
-    const [insertionValues, setInsertionValues] = useState<{ [key: string]: string }>({})
-    const [updateValues, setUpdateValues] = useState<{ [key: string]: string }>({})
+    const [insertionValues, setInsertionValues] = useState<StringMap>({})
+    const [updateValues, setUpdateValues] = useState<StringMap>({})
 
     return (
         <div id="sub-view">
-            <p>Define your relation here:</p>
-            <div className="relation-name">
-                <p>Relation name:&nbsp;</p>
-                <input type="text" value={relationName} onChange={handleRelationNameChange} />
-            </div>
-            <div className="field-rows">
-                {
-                    fieldRows.map(fieldRow => (
-                        <FieldRowView
-                            id={fieldRow.id}
-                            fieldName={fieldRow.fieldName}
-                            fieldType={fieldRow.fieldType}
-                            onFieldNameEdit={handleFieldNameEdit}
-                            onFieldTypeEdit={handleFieldTypeEdit}
-                            onFieldAddition={handleFieldRowAddition}
-                            onFieldDeletion={handleFieldRowDeletion}
-                            showDelete={fieldRows.length > 1}
-                            dataTypes={fieldTypes}
-                            key={fieldRow.id}
-                        />
-                    ))
-                }
-            </div>
-            <div className="create-relation-button">
-                <button onClick={hanldeRelationCreation}>Create Relation</button>
-            </div>
-            <div className="value-insertion">
-                <p>Use the below fields to insert an entry:</p>
-                {
-                    props.relationView.columns.map(col => {
-                        if (col !== "id") {
-                            return (
-                                <div className="row-value" key={col}>
-                                    <p>{col}:&nbsp;</p>
-                                    <input
-                                        type="text"
-                                        value={insertionValues[col]}
-                                        onChange={(event) => {
-                                            handleInsertionValueEdit(event, col)
-                                        }}
-                                    />
-                                </div>
-                            )
-                        }
-                    })
-                }
-            </div>
-            <div className="value-modification">
-                <p>Use the below fields to modify an existing entry:</p>
-                {
-                    props.relationView.columns.map(col => {
-                        return (
-                            <div className="row-value" key={col}>
-                                <p>{col}:&nbsp;</p>
-                                <input
-                                    type="text"
-                                    value={updateValues[col]}
-                                    onChange={(event) => {
-                                        handleUpdateValueEdit(event, col)
-                                    }}
+            {
+                showDefinitionField &&
+                <div className="relation-definition">
+                    <p>Define your relation here:</p>
+                    <div className="relation-name">
+                        <p>Relation name:&nbsp;</p>
+                        <input type="text" value={relationName} onChange={handleRelationNameChange} />
+                    </div>
+                    <div className="field-rows">
+                        {
+                            fieldRows.map(fieldRow => (
+                                <FieldRowView
+                                    id={fieldRow.id}
+                                    fieldName={fieldRow.fieldName}
+                                    fieldType={fieldRow.fieldType}
+                                    onFieldNameEdit={handleFieldNameEdit}
+                                    onFieldTypeEdit={handleFieldTypeEdit}
+                                    onFieldAddition={handleFieldRowAddition}
+                                    onFieldDeletion={handleFieldRowDeletion}
+                                    showDelete={fieldRows.length > 1}
+                                    dataTypes={fieldTypes}
+                                    key={fieldRow.id}
                                 />
-                            </div>
-                        )
-                    })
-                }
-            </div>
-            <div className="value-deletion horizontal-alignment">
-                <p>Insert the row id to be removed from the relation: </p>
-                <div>
-                    <input type="text" />
-                    <button>Remove</button>
+                            ))
+                        }
+                    </div>
+                    <div className="create-relation-button">
+                        <button onClick={hanldeRelationCreation}>Create Relation</button>
+                    </div>
                 </div>
-            </div>
+            }
+            {
+                !showDefinitionField &&
+                <div className="relation-edition">
+                    <div className="value-insertion">
+                        <p>Use the below fields to insert an entry:</p>
+                        {
+                            props.relationView.columns.map(col => {
+                                if (col !== "id") {
+                                    return (
+                                        <div className="row-value" key={col}>
+                                            <p>{col}:&nbsp;</p>
+                                            <input
+                                                type="text"
+                                                value={insertionValues[col]}
+                                                onChange={(event) => {
+                                                    handleInsertionValueEdit(event, col)
+                                                }}
+                                            />
+                                        </div>
+                                    )
+                                }
+                            })
+                        }
+                        <button onClick={handleEntryInsertion}>Insert Entry</button>
+                    </div>
+                    <div className="value-modification">
+                        <p>Use the below fields to modify an existing entry:</p>
+                        {
+                            props.relationView.columns.map(col => {
+                                return (
+                                    <div className="row-value" key={col}>
+                                        <p>{col}:&nbsp;</p>
+                                        <input
+                                            type="text"
+                                            value={updateValues[col]}
+                                            onChange={(event) => {
+                                                handleUpdateValueEdit(event, col)
+                                            }}
+                                        />
+                                    </div>
+                                )
+                            })
+                        }
+                        <button onClick={handleEntryUpdate}>Update Entry</button>
+                    </div>
+                    <div className="value-deletion">
+                        <p>Insert the row id to be removed from the relation: </p>
+                        <div>
+                            <input type="text" />
+                            <button>Remove</button>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     )
 
@@ -161,13 +177,12 @@ const EditView = (props: EditViewProps) => {
         let _insertionValues = { ...insertionValues }
         _insertionValues[col] = event.target.value
         setInsertionValues(_insertionValues)
-        console.log(_insertionValues)
     }
 
     function handleUpdateValueEdit(event: React.ChangeEvent<HTMLInputElement>, col: string) {
         let _updateValues = { ...updateValues }
         _updateValues[col] = event.target.value
-        setInsertionValues(_updateValues)
+        setUpdateValues(_updateValues)
     }
 
     async function hanldeRelationCreation() {
@@ -191,8 +206,8 @@ const EditView = (props: EditViewProps) => {
         let submittedRelation = await api.getRelation(relationName)
 
         //? Updating states for edit and add fields
-        let _insertionValues: { [key: string]: string } = {}
-        let _updateValues: { [key: string]: string } = {}
+        let _insertionValues: StringMap = {}
+        let _updateValues: StringMap = {}
         submittedRelation.columns.forEach(col => {
             if (col !== "id")
                 _insertionValues[col] = ""
@@ -204,7 +219,31 @@ const EditView = (props: EditViewProps) => {
 
 
         props.onRelationChange(submittedRelation)
+        setShowDefinitionField(false)
     }
+
+    async function handleEntryInsertion() {
+        let insertionData = {
+            name: relationName,
+            body: insertionValues
+        }
+        await api.insertEntry(insertionData)
+        let latestRelation = await api.getRelation(relationName)
+        props.onRelationChange(latestRelation)
+    }
+
+    async function handleEntryUpdate() {
+        let updateData = {
+            name: relationName,
+            body: updateValues,
+            id: updateValues.id
+        }
+        await api.updateEntry(updateData)
+        let latestRelation = await api.getRelation(relationName)
+        props.onRelationChange(latestRelation)
+    }
+
+
 }
 
 export default EditView

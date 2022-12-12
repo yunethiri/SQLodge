@@ -27,3 +27,17 @@ export async function getRelation(relationName: string) {
     }
 
 }
+
+export async function insertEntry(entry: any) {
+    let res = await api.post("/table-insert", entry)
+    if (res.ok) {
+        console.log("Inserted successfully!")
+    }
+}
+
+export async function updateEntry(entry: any) {
+    let res = await api.post("/table-update", entry)
+    if (res.ok) {
+        console.log("Inserted successfully!")
+    }
+}
