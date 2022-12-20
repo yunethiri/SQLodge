@@ -14,3 +14,29 @@ The role of this small web relation management application is to be a standard w
 8. `tsconfig.json` - compiler configuration for  TypeScript
 9. `package.json` - includes names and versions of the necessary view libraries used in the application
 10. `.gitignore`; `index.html`; `node_modules` - keeps unnecessary files away from version control; main entry point for the browser; folder storing necessary installed JavaScript libraries 
+
+## Setting up Python development environment with `pipenv`
+
+1. On Windows / MacOS / Linux machines - make sure you've installed Python and `python` (or `python3`) executable is accessible from the terminal (bash, batch or powershell). Many Linux-based OS's have Python already installed. On Windows installation, make sure to check the highlighted box. 
+[Click here to see a full installation guide for Windows / MacOS / Linux machines](https://www.tutorialsteacher.com/python/install-python)
+
+![windows-image](Readme/win_installer.png)
+
+
+
+2. To install `pipenv` - Python pip environment manager, run `pip install pipenv` in your terminal. Make sure `pipenv` is also in your OS path and accessible from your shell. *Note that* isolated environments are for protecting your system packages written in Python, in case anything crashes. It also separates your different projects using different names and versions of pip packages.
+3. In the current project directory, use `pipenv shell` to enter the virtual environment. Execute `exit` when you want to leave it. 
+4. Once you're in the pip environment, run `pip install -r requirements.txt` to install necessary libraries for database management with Python.
+5. If you're using VSCode as your development environment (which is preferable for this project), after creating the `pipenv` environment in the folder, you may enable in-editor for VSCode:
+   1. Open Command Pallette using `Shift + Command + P` on Mac and `Ctrl + Shift + P` on Windows/Linux
+   ![cmd_palette](Readme/vscode_menu.png)
+   2. Search and select "Python: Select Interpreter"
+   3. Select the newly created `pipenv` environment, which'll have the name of the folder to which you've added the project in it ![cmd_palette](Readme/cmd_palette_selection.png)
+   4. Then you can debug your code in full capacity
+
+## Deploying PostgreSQL Database Management System and its admin interface using Docker
+1. Make sure you have Docker installed on your device and you can run `docker-compose` command. You may refer to this [link](https://www.docker.com/products/docker-desktop/) in order to do so.
+2. You may want to modify the `POSTGRES_PASSWORD` environment variable in the `docker-compose.yml` file if you're going to deploy it to public for security purposes.
+3. In the project directory, run `docker-compose up -d` or `docker compose up -d` to build the virtual containers for PostgreSQL and its adminer interface.
+4. Default port for the Postgres DBMS is given `5432`, and for admin interface application it's `7890`. You can go to `0.0.0.0:7890` in your browser to visually interact with the DBMS. **Note that**  it's only done for the verification purposes to check if your code works.
+5. If both successful, you should see *Running* status for both container (names may differ) in you Docker Desktop application.

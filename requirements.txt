@@ -1,0 +1,4 @@
+Flask==2.2.2
+flask_cors==3.0.10
+SQLAlchemy==1.4.45
+sqlalchemy_utils==0.38.3
