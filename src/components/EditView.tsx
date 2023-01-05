@@ -3,16 +3,23 @@ import FieldRowView from "./FieldRowView"
 import * as api from '../api'
 import { RelationView } from "../App"
 
+// ? A custom `type` in TypeScript - defining a map (just as Python dictionaries), whose keys and values are both strings
 export type StringMap = { [dtype: string]: string }
 
+
+// ? Another interface (type) for the exchanged field/row in the relation
 interface FieldRow {
     id: number
+    // ? field name and type are dynamic in this case, allowing you to freely chose what you want to design
     fieldName: string
     fieldType: string
 }
 
+// ? The necessary interface to define the type of the props of the EditView element 
 interface EditViewProps {
+    // ? Takes RelationView from the parent to interactively modify
     relationView: RelationView
+    // ? Used to call the parent component (App in this case) every time something is updated to view it on the right side
     onRelationChange: (relationView: RelationView) => void
 }
 

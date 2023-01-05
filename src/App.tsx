@@ -23,9 +23,10 @@ function App() {
   })
 
   return (
+    // ? The main block containing all the editible DOM elements
     <div className="App">
       <div id="main-view">
-        {/* Below component is the user edit menu to create/modify the required table */}
+        {/* Below component is the user edit menu to create/modify the required table. Refer to `handleRelationViewUpdate` to learn about props*/}
         <EditView relationView={currentRelationView} onRelationChange={handleRelationViewUpdate} />
         {/* TableView component is just for displaying the table on the right side of the view */}
         <TableView relationView={currentRelationView} />
@@ -33,7 +34,9 @@ function App() {
     </div>
   )
 
+  // ? A props funcion for the EditView - keeping the relation view for up-to-date to be displayed on the right side of the window
   function handleRelationViewUpdate(relationView: RelationView) {
+    // ? Funcionality explained on the line it's defined
     setCurrentRelationView(relationView)
   }
 }
