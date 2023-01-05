@@ -26,7 +26,7 @@ The role of this small web relation management application is to be a standard w
 
 2. To install `pipenv` - Python pip environment manager, run `pip install pipenv` in your terminal. Make sure `pipenv` is also in your OS path and accessible from your shell. *Note that* isolated environments are for protecting your system packages written in Python, in case anything crashes. It also separates your different projects using different names and versions of pip packages.
 3. In the current project directory, use `pipenv shell` to enter the virtual environment. Execute `exit` when you want to leave it. 
-4. Once you're in the pip environment, run `pip install -r requirements.txt` to install necessary libraries for database management with Python.
+4. Once you're in the pip environment, run `pip install -r requirements.txt` to install necessary libraries for database management with Python (run `sudo apt-get install libpq-dev` if you face problems on Linux and `brew install postgresql` if you get errors with `pip install psycopg2`).
 5. If you're using VSCode with its *Python extension* as your development environment (which is preferable for this project), after creating the `pipenv` environment in the folder, you may enable in-editor for VSCode:
    1. Open Command Pallette using `Shift + Command + P` on Mac and `Ctrl + Shift + P` on Windows/Linux
    ![cmd_palette](Readme/vscode_menu.png)
