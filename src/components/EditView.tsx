@@ -24,7 +24,10 @@ interface EditViewProps {
 }
 
 
+// ? Definition of the component EditView - note that the const `EditView` is a function definiton and it is recognized as an object in runtime
 const EditView = (props: EditViewProps) => {
+    // ? 4 primitive data types used in definition. Note that all of them are sent to back as strings. You may try to write error-tolerant code in the backend to store them in respective PostgreSQL types
+    // ! You will have to add more data types as needed in your table definitions following the below pattern
     const dataTypes: StringMap = {
         'boolean': 'BOOL',
         'integer': 'INT',
@@ -32,11 +35,14 @@ const EditView = (props: EditViewProps) => {
         'time': 'TIME',
     }
 
+    // ? A JavaScript way of taking the keys of the above StringMap. It will return the list ['boolean','integer',...]
     const fieldTypes = Object.keys(dataTypes)
 
+    // ? A boolean STATE VARIABLE used to show/hide the user definition (left) and table view (right) windows 
     const [showDefinitionField, setShowDefinitionField] = useState<boolean>(true)
 
 
+    // ? Is a state variable - an array of FieldRow objects, used to store the added data fields one by one by the user during relation definition
     const [fieldRows, setFieldRows] = useState<Array<FieldRow>>([
         {
             id: 1,
@@ -44,24 +50,38 @@ const EditView = (props: EditViewProps) => {
             fieldType: fieldTypes[0],
         }
     ])
+
+    // ? A state variable to store the typed value into the relation name field
     const [relationName, setRelationName] = useState<string>("")
+    // ? First it might seem difficult to understand, imagine it this way:
+    // ? After you create a relation, you will receive a table view on the right and one of the fields on the left will change
+    // ? One of them will allow you to insert values into the responding fields. insertionValues is a StringMap storing those values-to-insert until you press the insert button
     const [insertionValues, setInsertionValues] = useState<StringMap>({})
+    // ? The same as above, the StringMap below stores the values for rows to update, and has just one additional parameter, id, to refer to a specific entry
     const [updateValues, setUpdateValues] = useState<StringMap>({})
 
     return (
+        // ? sub-view is the style class used to separate 2 main views - editing and table view
         <div id="sub-view">
             {
+                // ? In React JSX elements, if you have a boolean value equal to `false` before the && operator, the element coming after it won't be displayed. Usually used this way to control what to display/hide
                 showDefinitionField &&
+                // ? NOTE: All the below classNames are given for styling purposes. Refer to the App.scss file to see/modify them
                 <div className="relation-definition">
                     <p>Define your relation here:</p>
                     <div className="relation-name">
                         <p>Relation name:&nbsp;</p>
+                        {/* As you edit the string inside the Relation name field, the handleRelationNameChange function updates relationName state variable, and*/}
                         <input type="text" value={relationName} onChange={handleRelationNameChange} />
                     </div>
+
                     <div className="field-rows">
                         {
+                            // ? Map method returns an array of components in this case. You can see that each fieldRow element inside the fieldRows state variable is uniquely represented by an id
+                            // ? Refer to each method for onField... to know more about what they do
                             fieldRows.map(fieldRow => (
                                 <FieldRowView
+                                    // ? Below 3 field are for the 3 characteristics of the field definition
                                     id={fieldRow.id}
                                     fieldName={fieldRow.fieldName}
                                     fieldType={fieldRow.fieldType}
@@ -69,6 +89,7 @@ const EditView = (props: EditViewProps) => {
                                     onFieldTypeEdit={handleFieldTypeEdit}
                                     onFieldAddition={handleFieldRowAddition}
                                     onFieldDeletion={handleFieldRowDeletion}
+                                    // ? Prevents showing the delete button if there are less than 2 elements to display
                                     showDelete={fieldRows.length > 1}
                                     dataTypes={fieldTypes}
                                     key={fieldRow.id}
@@ -82,6 +103,7 @@ const EditView = (props: EditViewProps) => {
                 </div>
             }
             {
+                // ? The same logic as above for the following variable, reverted in this case
                 !showDefinitionField &&
                 <div className="relation-edition">
                     <div className="value-insertion">
