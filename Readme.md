@@ -36,7 +36,7 @@ The role of this small web relation management application is to be a standard w
 
 ## Setting up the application view development environment
 1. Only thing needed to be installed is `npm` and `vite`. You can select your OS version from [this link](https://nodejs.org/en/download/package-manager/) and see the instructions to install `npm`.
-2. After successfully installing `npm`, run the command `npm i -g vite` to globally install `vite`.
+2. After successfully installing `npm`, run the command `npm i -g vite` to globally install `vite` (try `install_npm.sh` to install it on your Linux-based OS). 
 
 ## Deploying PostgreSQL DBMS using Docker
 1. Make sure you have Docker installed on your device and you can run `docker-compose` command. You may refer to this [link](https://www.docker.com/products/docker-desktop/) in order to do so.
