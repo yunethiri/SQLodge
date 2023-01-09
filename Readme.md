@@ -50,3 +50,8 @@ The role of this small web relation management application is to be a standard w
 * You can run `app.py` in debug mode in VSCode (`F5` key), or alternatively, use `python app.py` in the terminal where `pipenv` environment is activated
 * For the view part, you can simply run `vite` command from the shell in the project directory. If you want to debug in detail, go to `package.json` file in VSCode and run by clicking the hovered Debug button: ![vite-debug-package-json](Readme/vite-debug.png)
 * Now refer to the code to get more closely acquainted!
+
+### Issues and bugs:
+* In case you face an error while running `app.py` related to Postgres libraries, try to install psycopg2 again as:
+   1. `pip uninstall psycopg2`
+   2. `pip install --no-binary :all: psycopg2`
