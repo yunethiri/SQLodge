@@ -36,7 +36,19 @@ function App() {
 
   // ? A props funcion for the EditView - keeping the relation view for up-to-date to be displayed on the right side of the window
   function handleRelationViewUpdate(relationView: RelationView) {
-    // ? Funcionality explained on the line it's defined
+    // ? Here a few data type handling is done in order to properly diplay the BOOLEAN types since HTML visualizes true and false types as blank
+    // ? First loop iterates through the displayed rows
+    for (let i = 0; i < relationView.rows.length; i++) {
+      // ? The second loop checks each field type
+      for (let fieldKey of Object.keys(relationView.rows[i])) {
+        let fieldValue = relationView.rows[i][fieldKey]
+        // ? And it stringifies it if it is boolean
+        if (typeof (fieldValue) === 'boolean') {
+          relationView.rows[i][fieldKey] = fieldValue.toString()
+        }
+      }
+    }
+    // ? Funcionality of RelationView explained on the line it's defined
     setCurrentRelationView(relationView)
   }
 }
