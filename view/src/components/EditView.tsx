@@ -23,20 +23,21 @@ interface EditViewProps {
     onRelationChange: (relationView: RelationView) => void
 }
 
+export const DataTypes: StringMap = {
+    'boolean': 'BOOL',
+    'integer': 'INT',
+    'text': 'TEXT',
+    'time': 'TIME',
+}
 
 // ? Definition of the component EditView - note that the const `EditView` is a function definiton and it is recognized as an object in runtime
 const EditView = (props: EditViewProps) => {
     // ? 4 primitive data types used in definition. Note that all of them are sent to back as strings. You may try to write error-tolerant code in the backend to store them in respective PostgreSQL types
     // ! You will have to add more data types as needed in your table definitions following the below pattern
-    const dataTypes: StringMap = {
-        'boolean': 'BOOL',
-        'integer': 'INT',
-        'text': 'TEXT',
-        'time': 'TIME',
-    }
+
 
     // ? A JavaScript way of taking the keys of the above StringMap. It will return the list ['boolean','integer',...]
-    const fieldTypes = Object.keys(dataTypes)
+    const fieldTypes = Object.keys(DataTypes)
 
     // ? A boolean STATE VARIABLE used to show/hide the user definition (left) and table view (right) windows 
     const [showDefinitionField, setShowDefinitionField] = useState<boolean>(true)
@@ -221,7 +222,7 @@ const EditView = (props: EditViewProps) => {
             if (fieldRow.fieldName === "") {
                 fieldRow.fieldName = "no_name"
             }
-            body[fieldRow.fieldName] = dataTypes[fieldRow.fieldType]
+            body[fieldRow.fieldName] = DataTypes[fieldRow.fieldType]
         }
         )
 
@@ -252,9 +253,18 @@ const EditView = (props: EditViewProps) => {
     }
 
     async function handleEntryInsertion() {
+        let valueTypes: StringMap = {}
+        for (let key of Object.keys(insertionValues)) {
+            let fieldValue = fieldRows.find(row => row.fieldName == key)
+            if (fieldValue) {
+                valueTypes[key] = DataTypes[fieldValue.fieldType]
+            }
+        }
+
         let insertionData = {
             name: relationName,
-            body: insertionValues
+            body: insertionValues,
+            valueTypes: valueTypes
         }
         await api.insertEntry(insertionData)
         let latestRelation = await api.getRelation(relationName)

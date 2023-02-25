@@ -29,8 +29,17 @@ engine = sqlalchemy.create_engine(
 # ? `db` - the database (connection) object will be used for executing queries on the connected database named `postgres` in our deployed Postgres DBMS
 db = engine.connect()
 
+# ? A dictionary containing
+data_types = {
+    'boolean': 'BOOL',
+    'integer': 'INT',
+    'text': 'TEXT',
+    'time': 'TIME',
+}
 
 # ? @app.get is called a decorator, from the Flask class, converting a simple python function to a REST API endpoint (function)
+
+
 @app.get("/table")
 def get_relation():
     # ? This method returns the contents of a table whose name (table-name) is given in the url `http://localhost:port/table?name=table-name`
@@ -176,6 +185,7 @@ def generate_insert_table_statement(insertion: Dict):
     # ? Fetching table name and the rows/tuples body object from the request
     table_name = insertion["name"]
     body = insertion["body"]
+    valueTypes = insertion["valueTypes"]
 
     # ? Generating the default insert statement template
     statement = f"INSERT INTO {table_name}  "
@@ -185,7 +195,10 @@ def generate_insert_table_statement(insertion: Dict):
     column_values = "("
     for key, value in body.items():
         column_names += (key+",")
-        column_values += (f"\'{value}\',")
+        if valueTypes[key]=="TEXT":
+            column_values += (f"\'{value}\',")
+        else:
+            column_values += (f"{value},")
 
     # ? Removing the last default comma
     column_names = column_names[:-1]+")"
