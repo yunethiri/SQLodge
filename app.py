@@ -65,7 +65,7 @@ def create_table():
         statement = generate_create_table_statement(table)
         # ? the remaining steps are the same
         db.execute(statement)
-        return Response(statement.text, 200)
+        return Response(statement.text)
     except Exception as e:
         return Response(str(e), 403)
 
@@ -80,7 +80,7 @@ def insert_into_table():
         insertion = json.loads(data)
         statement = generate_insert_table_statement(insertion)
         db.execute(statement)
-        return Response(statement, 200)
+        return Response(statement.text)
     except Exception as e:
         return Response(str(e), 403)
 
@@ -94,7 +94,7 @@ def update_table():
         update = json.loads(data)
         statement = generate_update_table_statement(update)
         db.execute(statement)
-        return Response(statement, 200)
+        return Response(statement.text, 200)
     except Exception as e:
         return Response(str(e), 403)
 
@@ -108,7 +108,7 @@ def delete_row():
         delete = json.loads(data)
         statement = generate_delete_statement(delete)
         db.execute(statement)
-        return Response(statement, 200)
+        return Response(statement.text)
     except Exception as e:
         return Response(str(e), 403)
 
@@ -151,7 +151,7 @@ def generate_delete_statement(details: Dict):
     id = details["id"]
     # ? Generates the deletion query for the given entry with the id
     statement = f"DELETE FROM {table_name} WHERE {table_name}.id={id};"
-    return statement
+    return sqlalchemy.text(statement)
 
 
 def generate_update_table_statement(update: Dict):
@@ -169,7 +169,7 @@ def generate_update_table_statement(update: Dict):
 
     # ?Finalizing the update statement with table and row details and returning
     statement = statement[:-1]+f" WHERE {table_name}.id={id};"
-    return statement
+    return sqlalchemy.text(statement)
 
 
 def generate_insert_table_statement(insertion: Dict):
@@ -194,7 +194,7 @@ def generate_insert_table_statement(insertion: Dict):
     # ? Combining it all into one statement and returning
     #! You may try to expand it to multiple tuple insertion in another method
     statement = statement + column_names+" VALUES "+column_values+";"
-    return statement
+    return sqlalchemy.text(statement)
 
 
 def generate_create_table_statement(table: Dict):
