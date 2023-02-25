@@ -39,7 +39,7 @@ def get_relation():
     # ? We use try-except statements for exception handling since any wrong query will crash the whole flow
     try:
         # ? Statements are built using f-strings - Python's formatted strings
-        statement = f"SELECT * FROM {relation_name};"
+        statement = sqlalchemy.text(f"SELECT * FROM {relation_name};")
         # ? Results returned by the DBMS after execution are stored into res object defined in sqlalchemy (for reference)
         res = db.execute(statement)
         # ? Data is extracted from the res objects by the custom function for each query case
@@ -65,7 +65,7 @@ def create_table():
         statement = generate_create_table_statement(table)
         # ? the remaining steps are the same
         db.execute(statement)
-        return Response(statement, 200)
+        return Response(statement.text, 200)
     except Exception as e:
         return Response(str(e), 403)
 
@@ -113,7 +113,7 @@ def delete_row():
         return Response(str(e), 403)
 
 
-def generate_table_return_result(res: sqlalchemy.engine.cursor.LegacyCursorResult):
+def generate_table_return_result(res):
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
 
@@ -206,10 +206,10 @@ def generate_create_table_statement(table: Dict):
     statement = f"DROP TABLE IF EXISTS {table_name}; CREATE TABLE {table_name} (id serial NOT NULL PRIMARY KEY,"
     # ? As stated above, column names and types are appended to the creation query from the mapped JSON object
     for key, value in table_body.items():
-        statement += (key+" "+value+",")
+        statement += (f"{key}"+" "+f"{value}"+",")
     # ? closing the final statement (by removing the last ',' and adding ');' termination and returning it
     statement = statement[:-1] + ");"
-    return statement
+    return sqlalchemy.text(statement)
 
 
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
