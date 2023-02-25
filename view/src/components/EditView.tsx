@@ -60,7 +60,8 @@ const EditView = (props: EditViewProps) => {
     const [insertionValues, setInsertionValues] = useState<StringMap>({})
     // ? The same as above, the StringMap below stores the values for rows to update, and has just one additional parameter, id, to refer to a specific entry
     const [updateValues, setUpdateValues] = useState<StringMap>({})
-
+    // ? ID of the entry/row to be deleted from the relation
+    const [deletionId, setDeletionId] = useState<number>(-1)
     return (
         // ? sub-view is the style class used to separate 2 main views - editing and table view
         <div id="sub-view">
@@ -152,8 +153,10 @@ const EditView = (props: EditViewProps) => {
                     <div className="value-deletion">
                         <p>Insert the row id to be removed from the relation: </p>
                         <div>
-                            <input type="text" />
-                            <button>Remove</button>
+                            <input type="text" onChange={(event) => {
+                                handleDeleteValueEdit(event)
+                            }} />
+                            <button onClick={handleEntryDeletion}>Remove</button>
                         </div>
                     </div>
                 </div>
@@ -280,6 +283,21 @@ const EditView = (props: EditViewProps) => {
         await api.updateEntry(updateData)
         let latestRelation = await api.getRelation(relationName)
         props.onRelationChange(latestRelation)
+    }
+
+    async function handleEntryDeletion() {
+        let deletionData = {
+            relationName,
+            deletionId
+        }
+        await api.deleteEntry(deletionData)
+        let latestRelation = await api.getRelation(relationName)
+        props.onRelationChange(latestRelation)
+    }
+
+    function handleDeleteValueEdit(event: React.ChangeEvent<HTMLInputElement>) {
+        let _deletionId = parseInt(event.currentTarget.value)
+        setDeletionId(_deletionId)
     }
 
 

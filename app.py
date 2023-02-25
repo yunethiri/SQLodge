@@ -108,8 +108,8 @@ def update_table():
         return Response(str(e), 403)
 
 
-@app.post("/table-delete")
-# ? a flask decorator listening for POST requests at the url /table-delete and handles the entry deletion in the given table/relation
+@app.post("/entry-delete")
+# ? a flask decorator listening for POST requests at the url /entry-delete and handles the entry deletion in the given table/relation
 def delete_row():
     # ? Steps are common in all of the POST behaviors. Refer to the statement generation for the explanatory
     data = request.data.decode()
@@ -156,10 +156,10 @@ def generate_table_return_result(res):
 
 def generate_delete_statement(details: Dict):
     # ? Fetches the entry id for the table name
-    table_name = details["name"]
-    id = details["id"]
+    table_name = details["relationName"]
+    id = details["deletionId"]
     # ? Generates the deletion query for the given entry with the id
-    statement = f"DELETE FROM {table_name} WHERE {table_name}.id={id};"
+    statement = f"DELETE FROM {table_name} WHERE id={id};"
     return sqlalchemy.text(statement)
 
 

@@ -47,3 +47,10 @@ export async function updateEntry(entry: any) {
         console.log("Inserted successfully!")
     }
 }
+
+export async function deleteEntry(deletionData: any) {
+    let res = await api.post("/entry-delete", deletionData)
+    if (res.ok) {
+        console.log("Deleted successfully!")
+    }
+}
