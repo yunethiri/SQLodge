@@ -51,12 +51,16 @@ def get_relation():
         statement = sqlalchemy.text(f"SELECT * FROM {relation_name};")
         # ? Results returned by the DBMS after execution are stored into res object defined in sqlalchemy (for reference)
         res = db.execute(statement)
+        # ? committing the statement writes the db state to the disk; note that we use the concept of rollbacks for safe DB management
+        db.commit()
         # ? Data is extracted from the res objects by the custom function for each query case
         # ! Note that you'll have to write custom handling methods for your custom queries
         data = generate_table_return_result(res)
         # ? Response object is instantiated with the formatted data and returned with the success code 200
         return Response(data, 200)
     except Exception as e:
+        # ? We're rolling back at any case of failure
+        db.rollback()
         # ? At any error case, the error is returned with the code 403, meaning invalid request
         # * You may customize it for different exception types, in case you may want
         return Response(str(e), 403)
@@ -74,8 +78,10 @@ def create_table():
         statement = generate_create_table_statement(table)
         # ? the remaining steps are the same
         db.execute(statement)
+        db.commit()
         return Response(statement.text)
     except Exception as e:
+        db.rollback()
         return Response(str(e), 403)
 
 
@@ -89,8 +95,10 @@ def insert_into_table():
         insertion = json.loads(data)
         statement = generate_insert_table_statement(insertion)
         db.execute(statement)
+        db.commit()
         return Response(statement.text)
     except Exception as e:
+        db.rollback()
         return Response(str(e), 403)
 
 
@@ -103,8 +111,10 @@ def update_table():
         update = json.loads(data)
         statement = generate_update_table_statement(update)
         db.execute(statement)
+        db.commit()
         return Response(statement.text, 200)
     except Exception as e:
+        db.rollback()
         return Response(str(e), 403)
 
 
@@ -117,8 +127,10 @@ def delete_row():
         delete = json.loads(data)
         statement = generate_delete_statement(delete)
         db.execute(statement)
+        db.commit()
         return Response(statement.text)
     except Exception as e:
+        db.rollback()
         return Response(str(e), 403)
 
 

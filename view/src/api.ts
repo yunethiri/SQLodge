@@ -38,19 +38,25 @@ export async function insertEntry(entry: any) {
     let res = await api.post("/table-insert", entry)
     if (res.ok) {
         console.log("Inserted successfully!")
+        return true
     }
+    return false
 }
 
 export async function updateEntry(entry: any) {
     let res = await api.post("/table-update", entry)
     if (res.ok) {
         console.log("Inserted successfully!")
+        return true
     }
+    return false
 }
 
 export async function deleteEntry(deletionData: any) {
     let res = await api.post("/entry-delete", deletionData)
     if (res.ok) {
         console.log("Deleted successfully!")
+        return true
     }
+    return false
 }

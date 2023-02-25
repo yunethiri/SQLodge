@@ -269,7 +269,11 @@ const EditView = (props: EditViewProps) => {
             body: insertionValues,
             valueTypes: valueTypes
         }
-        await api.insertEntry(insertionData)
+        let success = await api.insertEntry(insertionData)
+        if (!success) {
+            alert("Failed to insert the given entry!")
+            return
+        }
         let latestRelation = await api.getRelation(relationName)
         props.onRelationChange(latestRelation)
     }
@@ -280,7 +284,11 @@ const EditView = (props: EditViewProps) => {
             body: updateValues,
             id: updateValues.id
         }
-        await api.updateEntry(updateData)
+        let success = await api.updateEntry(updateData)
+        if (!success) {
+            alert("Failed to update the given entry!")
+            return
+        }
         let latestRelation = await api.getRelation(relationName)
         props.onRelationChange(latestRelation)
     }
@@ -290,7 +298,11 @@ const EditView = (props: EditViewProps) => {
             relationName,
             deletionId
         }
-        await api.deleteEntry(deletionData)
+        let success = await api.deleteEntry(deletionData)
+        if (!success) {
+            alert("Failed to delete the given entry!")
+            return
+        }
         let latestRelation = await api.getRelation(relationName)
         props.onRelationChange(latestRelation)
     }
