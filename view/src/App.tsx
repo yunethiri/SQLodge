@@ -48,6 +48,8 @@ function App() {
         }
       }
     }
+    //? Sorting by ID for better sequential visualization
+    relationView.rows = relationView.rows.sort((a, b) => a.id - b.id)
     // ? Funcionality of RelationView explained on the line it's defined
     setCurrentRelationView(relationView)
   }
