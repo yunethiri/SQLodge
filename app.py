@@ -207,7 +207,7 @@ def generate_insert_table_statement(insertion: Dict):
     column_values = "("
     for key, value in body.items():
         column_names += (key+",")
-        if valueTypes[key]=="TEXT":
+        if valueTypes[key] == "TEXT" or valueTypes[key] == "TIME":
             column_values += (f"\'{value}\',")
         else:
             column_values += (f"{value},")
