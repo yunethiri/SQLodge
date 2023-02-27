@@ -271,7 +271,6 @@ const EditView = (props: EditViewProps) => {
         }
         let success = await api.insertEntry(insertionData)
         if (!success) {
-            alert("Failed to insert the given entry!")
             return
         }
         let latestRelation = await api.getRelation(relationName)
@@ -286,7 +285,6 @@ const EditView = (props: EditViewProps) => {
         }
         let success = await api.updateEntry(updateData)
         if (!success) {
-            alert("Failed to update the given entry!")
             return
         }
         let latestRelation = await api.getRelation(relationName)
@@ -300,7 +298,6 @@ const EditView = (props: EditViewProps) => {
         }
         let success = await api.deleteEntry(deletionData)
         if (!success) {
-            alert("Failed to delete the given entry!")
             return
         }
         let latestRelation = await api.getRelation(relationName)

@@ -2,8 +2,11 @@ import apisauce from 'apisauce'
 import { RelationView } from './App'
 
 // ? REST API functions to communicate with your database backend
+// ? Machine IP - replace with your server's IP address; run `ifconfig` and take the first inet IP address (should be below ens32)
+const machineIP = "172.25.76.144"
+const machinePort = "2222"
 const api = apisauce.create({
-    baseURL: "http://localhost:2222",
+    baseURL: `http://${machineIP}:${machinePort}`,
 })
 
 // ? A POST query to create your relation
@@ -16,6 +19,7 @@ export async function createRelation(relationData: any) {
         alert("Created relation named " + relationData.name)
     } else {
         alert("Failed to create relation named " + relationData.name)
+        console.log(res.data)
     }
 }
 
@@ -40,6 +44,7 @@ export async function insertEntry(entry: any) {
         console.log("Inserted successfully!")
         return true
     }
+    alert("Failed to insert the given entry!")
     return false
 }
 
@@ -49,6 +54,7 @@ export async function updateEntry(entry: any) {
         console.log("Inserted successfully!")
         return true
     }
+    alert("Failed to update the given entry!")
     return false
 }
 
@@ -58,5 +64,6 @@ export async function deleteEntry(deletionData: any) {
         console.log("Deleted successfully!")
         return true
     }
+    alert("Failed to delete the given entry!")
     return false
 }

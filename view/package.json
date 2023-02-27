@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "apisauce": "^2.1.6",
+    "ip": "^1.1.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
