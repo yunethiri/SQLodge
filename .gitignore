@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 Pipfile.lock
 *.pdf
+__pycache__
+nohup.out

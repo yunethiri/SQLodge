@@ -1,5 +1,5 @@
 # ? Cross-origin Resource Sharing - here it allows the view and core applications deployed on different ports to communicate. No need to know anything about it since it's only used once
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 # ? Python's built-in library for JSON operations. Here, is used to convert JSON strings into Python dictionaries and vice-versa
 import json
 # ? flask - library used to write REST API endpoints (functions in simple words) to communicate with the client (view) application's interactions
@@ -236,8 +236,18 @@ def generate_create_table_statement(table: Dict):
     statement = statement[:-1] + ");"
     return sqlalchemy.text(statement)
 
+# ? This method can be used by waitress-serve CLI 
+def create_app():
+   return app
 
+# ? The port where the debuggable DB management API is served
+PORT = 2222
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
-    app.run("0.0.0.0", 2222)
+    app.run("0.0.0.0", PORT)
+    # ? Uncomment the below lines and comment the above lines below `if __name__ == "__main__":` in order to run on the production server
+    # ? Note that you may have to install waitress running `pip install waitress`
+    # ? If you are willing to use waitress-serve command, please add `/home/sadm/.local/bin` to your ~/.bashrc
+    # from waitress import serve
+    # serve(app, host="0.0.0.0", port=PORT)
