@@ -48,6 +48,7 @@ def get_relation():
     # ? We use try-except statements for exception handling since any wrong query will crash the whole flow
     try:
         # ? Statements are built using f-strings - Python's formatted strings
+        # ! Use cursors for better results
         statement = sqlalchemy.text(f"SELECT * FROM {relation_name};")
         # ? Results returned by the DBMS after execution are stored into res object defined in sqlalchemy (for reference)
         res = db.execute(statement)
@@ -228,6 +229,7 @@ def generate_create_table_statement(table: Dict):
     # ? Table body itself is a JSON object mapping field/column names to their values
     table_body = table["body"]
     # ? Default table creation template query is extended below. Note that we drop the existing one each time. You might improve this behavior if you will
+    # ! ID is the case of simplicity
     statement = f"DROP TABLE IF EXISTS {table_name}; CREATE TABLE {table_name} (id serial NOT NULL PRIMARY KEY,"
     # ? As stated above, column names and types are appended to the creation query from the mapped JSON object
     for key, value in table_body.items():
