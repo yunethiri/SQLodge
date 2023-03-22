@@ -5,15 +5,21 @@ import json
 # ? flask - library used to write REST API endpoints (functions in simple words) to communicate with the client (view) application's interactions
 # ? request - is the default object used in the flask endpoints to get data from the requests
 # ? Response - is the default HTTP Response object, defining the format of the returned data by this api
-from flask import Flask, request, Response
+from flask import Flask, request, Response, render_template, url_for, flash, redirect
 # ? sqlalchemy is the main library we'll use here to interact with PostgresQL DBMS
 import sqlalchemy
 # ? Just a class to help while coding by suggesting methods etc. Can be totally removed if wanted, no change
 from typing import Dict
 
+# newly added
+from datetime import datetime
+#from flask_sqlalchemy import SQLAlchemy
+from form import RegistrationForm, LoginForm
+
 
 # ? web-based applications written in flask are simply called apps are initialized in this format from the Flask base class. You may see the contents of `__name__` by hovering on it while debugging if you're curious
 app = Flask(__name__)
+app.config['SECRET_KEY'] = '52e0e783a4456fdef0c336bbf207eed8'
 
 # ? Just enabling the flask app to be able to communicate with any request source
 CORS(app)
@@ -38,6 +44,47 @@ data_types = {
 }
 
 # ? @app.get is called a decorator, from the Flask class, converting a simple python function to a REST API endpoint (function)
+posts = [
+    {
+        'author': 'Corey Schafer',
+        'title': '2BR Apartment',
+        'content': '5 mins walk from MRT',
+        'date_posted': 'April 20, 2018'
+    },
+    {
+        'author': 'Jane Doe',
+        'title': '3-storey Townhose',
+        'content': 'Gym and swimming pool',
+        'date_posted': 'April 21, 2018'
+    }
+]
+
+
+@app.route("/")
+@app.route("/home")
+def home():
+    return render_template('home.html', posts=posts)
+
+
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        flash(f'Account created for {form.username.data}!', 'success')
+        return redirect(url_for('home'))
+    return render_template('register.html', title='Register', form=form)
+
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        if form.email.data == 'admin@blog.com' and form.password.data == 'password':
+            flash('You have been logged in!', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash('Login Unsuccessful. Please check username and password', 'danger')
+    return render_template('login.html', title='Login', form=form)
 
 
 @app.get("/table")
@@ -242,8 +289,12 @@ def generate_create_table_statement(table: Dict):
 def create_app():
    return app
 
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
 # ? The port where the debuggable DB management API is served
-PORT = 2222
+PORT = 5000
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
