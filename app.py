@@ -5,17 +5,19 @@ import json
 # ? flask - library used to write REST API endpoints (functions in simple words) to communicate with the client (view) application's interactions
 # ? request - is the default object used in the flask endpoints to get data from the requests
 # ? Response - is the default HTTP Response object, defining the format of the returned data by this api
-from flask import Flask, request, Response, render_template, url_for, flash, redirect
+from flask import Flask, request, Response, render_template, url_for, flash, redirect, jsonify
 # ? sqlalchemy is the main library we'll use here to interact with PostgresQL DBMS
 import sqlalchemy
 # ? Just a class to help while coding by suggesting methods etc. Can be totally removed if wanted, no change
 from typing import Dict
+from json2html import *
 
 # newly added
 from datetime import datetime
-#from flask_sqlalchemy import SQLAlchemy
-from form import RegistrationForm, LoginForm
+# from flask_sqlalchemy import SQLAlchemy
 
+from forms import RegistrationForm, LoginForm
+import simplejson as json
 
 # ? web-based applications written in flask are simply called apps are initialized in this format from the Flask base class. You may see the contents of `__name__` by hovering on it while debugging if you're curious
 app = Flask(__name__)
@@ -66,12 +68,53 @@ def home():
     return render_template('home.html', posts=posts)
 
 
+@app.route("/")
+@app.get("/listings")
+def get_relation():
+    # ? This method returns the contents of a table whose name (table-name) is given in the url `http://localhost:port/listings?name=listings`
+    # ? Below is the default way of parsing the arguments from http url's using flask's request object
+    # relation_name = request.args.get('name', default="", type=str)
+    # ? We use try-except statements for exception handling since any wrong query will crash the whole flow
+    try:
+        # ? Statements are built using f-strings - Python's formatted strings
+        # ! Use cursors for better results
+        statement = sqlalchemy.text(f"SELECT * FROM PROPERTIES;")
+        # ? Results returned by the DBMS after execution are stored into res object defined in sqlalchemy (for reference)
+        res = db.execute(statement)
+        # ? committing the statement writes the db state to the disk; note that we use the concept of rollbacks for safe DB management
+        db.commit()
+        # ? Data is extracted from the res objects by the custom function for each query case
+        # ! Note that you'll have to write custom handling methods for your custom queries
+        data = generate_table_return_result(res)
+        # ? Response object is instantiated with the formatted data and returned with the success code 200
+        html_data = json2html.convert(json = data)
+        return render_template('listings.html', title = 'Listings', table_data = html_data)
+        #return Response(data, 200)
+    except Exception as e:
+        # ? We're rolling back at any case of failure
+        db.rollback()
+        # ? At any error case, the error is returned with the code 403, meaning invalid request
+        # * You may customize it for different exception types, in case you may want
+        return Response(str(e), 403)
+
+
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        flash(f'Account created for {form.username.data}!', 'success')
-        return redirect(url_for('home'))
+        try:
+            statement = sqlalchemy.text(f"INSERT INTO guests VALUES ('{form.username.data}', '{form.email.data}', '{form.password.data}');")
+            db.execute(statement)
+            db.commit()
+            flash(f'Account created for {form.username.data}!', 'success')
+            #return redirect(url_for('home'))
+            flash(f'Account created for {form.username.data}!', 'success')
+            return redirect(url_for('home'))
+            #return Response(statement.text)
+        except Exception as e:
+            db.rollback()
+            return Response(str(e), 403)
+        
     return render_template('register.html', title='Register', form=form)
 
 
@@ -79,14 +122,33 @@ def register():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
+        try:
+            statement = sqlalchemy.text(f"SELECT * FROM guests g VALUES WHERE g.name ='{form.username.data}' AND g.email = '{form.email.data}' AND g.password = '{form.password.data}');")
+            db.execute(statement)
+            db.commit()
+            return redirect(url_for('home'))
+        except Exception as e:
+            db.rollback()
+            flash('Login Unsuccessful. Please check username and password', 'danger')
+            return Response(str(e), 403)
+            
+    return render_template('login.html', title='Login', form=form)
+
+    """
+    if form.validate_on_submit():
         if form.email.data == 'admin@blog.com' and form.password.data == 'password':
             flash('You have been logged in!', 'success')
             return redirect(url_for('home'))
         else:
             flash('Login Unsuccessful. Please check username and password', 'danger')
     return render_template('login.html', title='Login', form=form)
+    """
 
+#@app.route("/profile", methods=['GET', 'POST'])
+#def account():
+#    return render_template('profile.html', title='Profile')
 
+"""
 @app.get("/table")
 def get_relation():
     # ? This method returns the contents of a table whose name (table-name) is given in the url `http://localhost:port/table?name=table-name`
@@ -112,7 +174,7 @@ def get_relation():
         # ? At any error case, the error is returned with the code 403, meaning invalid request
         # * You may customize it for different exception types, in case you may want
         return Response(str(e), 403)
-
+"""
 
 # ? a flask decorator listening for POST requests at the url /table-create
 @app.post("/table-create")
@@ -290,11 +352,10 @@ def create_app():
    return app
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+#if __name__ == '__main__':
+#    app.run(debug=True)
 
-# ? The port where the debuggable DB management API is served
-PORT = 5000
+PORT = 5006
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
