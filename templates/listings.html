@@ -1,39 +1,38 @@
- <table> 
-    <thead>
+<table>
+  <thead>
+    <tr>
+      <th>property_id</th>
+      <th>owner</th>
+      <th>property_name</th>
+      <th>property_type</th>
+      <th>price_per_night</th>
+      <th>zipcode</th>
+      <th>city</th>
+      <th>neighbourhood</th>
+      <th>square_feet</th>
+      <th>accommodates</th>
+      <th>no_of_bathrooms</th>
+      <th>no_of_bedrooms</th>
+      <th>amenities</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in table_data['rows'] %}
       <tr>
-        <th></th>
-        <th>property_id</th>
-        <th>owner</th>
-        <th>property_name</th>
-        <th>property_type</th>
-        <th>price_per_night</th>
-        <th>zipcode</th>
-        <th>city</th>
-        <th>neighbourhood</th>
-        <th>square_feet</th>
-        <th>accommodates</th>
-        <!--th>no_of_bathrooms</th!-->
-        <th>no_of_bedrooms</th>
-        <th>amenities</th>
+        <td>{{ row['property_id'] }}</td>
+        <td>{{ row['owner'] }}</td>
+        <td>{{ row['property_name'] }}</td>
+        <td>{{ row['property_type'] }}</td>
+        <td>{{ row['price_per_night'] }}</td>
+        <td>{{ row['zipcode'] }}</td>
+        <td>{{ row['city'] }}</td>
+        <td>{{ row['neighbourhood'] }}</td>
+        <td>{{ row['square_feet'] }}</td>
+        <td>{{ row['accommodates'] }}</td>
+        <td>{{ row['no_of_bathrooms'] }}</td>
+        <td>{{ row['no_of_bedrooms'] }}</td>
+        <td>{{ row['amenities'] }}</td>
       </tr>
-    </thead>
-    <tbody>
-      {% for i in html_data %}
-        <tr>
-            <th>property_id</th>
-            <th>owner</th>
-            <th>property_name</th>
-            <th>property_type</th>
-            <th>price_per_night</th>
-            <th>zipcode</th>
-            <th>city</th>
-            <th>neighbourhood</th>
-            <th>square_feet</th>
-            <th>accommodates</th>
-            <th>no_of_bathrooms</th>
-            <!--th>no_of_bedrooms</th-->
-            <th>amenities</th>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+    {% endfor %}
+  </tbody>
+</table>
