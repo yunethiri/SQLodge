@@ -5,16 +5,26 @@ import json
 # ? flask - library used to write REST API endpoints (functions in simple words) to communicate with the client (view) application's interactions
 # ? request - is the default object used in the flask endpoints to get data from the requests
 # ? Response - is the default HTTP Response object, defining the format of the returned data by this api
-from flask import Flask, request, Response, render_template, url_for, flash, redirect
+from flask import Flask, request, Response, render_template, url_for, flash, redirect, jsonify
 # ? sqlalchemy is the main library we'll use here to interact with PostgresQL DBMS
 import sqlalchemy
 # ? Just a class to help while coding by suggesting methods etc. Can be totally removed if wanted, no change
 from typing import Dict
+from json2html import *
 
 # newly added
 from datetime import datetime
-#from flask_sqlalchemy import SQLAlchemy
+# from sqlalchemy import modules to create the Tables and MetaData
+from sqlalchemy import MetaData
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import Session
+
 from forms import RegistrationForm, LoginForm
+from decimal import Decimal
+
+from flask_login import current_user, login_required, LoginManager, UserMixin
+
+#import simplejson as json
 
 
 # ? web-based applications written in flask are simply called apps are initialized in this format from the Flask base class. You may see the contents of `__name__` by hovering on it while debugging if you're curious
@@ -31,9 +41,26 @@ connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost/p
 engine = sqlalchemy.create_engine(
     "postgresql://postgres:postgres@localhost/postgres"
 )
-#
+
 # ? `db` - the database (connection) object will be used for executing queries on the connected database named `postgres` in our deployed Postgres DBMS
 db = engine.connect()
+
+# session is used for ORM functionalities while connection is used for directly executing SQL queries
+session = Session(engine)
+
+# create the metadata for Tables 
+Base = automap_base()
+Base.prepare(autoload_with=engine)
+
+GuestModel = Base.classes.guests
+OwnersModel = Base.classes.owners
+Properties = Base.classes.properties
+Bookings = Base.classes.bookings
+
+class Guests(GuestModel, UserMixin):
+    pass
+class Owners(OwnersModel, UserMixin):
+    pass
 
 # ? A dictionary containing
 data_types = {
