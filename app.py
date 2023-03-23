@@ -14,11 +14,16 @@ from json2html import *
 
 # newly added
 from datetime import datetime
-# from sqlalchemy import 
-
+# from sqlalchemy import modules to create the Tables and MetaData
+from sqlalchemy import MetaData
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import Session
 
 from forms import RegistrationForm, LoginForm
-import simplejson as json
+from decimal import Decimal
+
+#import simplejson as json
+
 
 # ? web-based applications written in flask are simply called apps are initialized in this format from the Flask base class. You may see the contents of `__name__` by hovering on it while debugging if you're curious
 app = Flask(__name__)
@@ -101,10 +106,11 @@ def get_relation():
         # ? Data is extracted from the res objects by the custom function for each query case
         # ! Note that you'll have to write custom handling methods for your custom queries
         data = generate_table_return_result(res)
+        data = json.loads(data)
+        #app.logger.debug(data["columns"])
         # ? Response object is instantiated with the formatted data and returned with the success code 200
-        html_data = json2html.convert(json = data)
-        return render_template('listings.html', title = 'Listings', table_data = html_data)
-        #return Response(data, 200)
+        return render_template('listings.html', title = 'Listings', table_data = data)
+        #return Response(html_data, 200)
     except Exception as e:
         # ? We're rolling back at any case of failure
         db.rollback()
@@ -118,7 +124,7 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         try:
-            statement = sqlalchemy.text(f"INSERT INTO guests VALUES ('{form.username.data}', '{form.email.data}', '{form.password.data}');")
+            statement = sqlalchemy.text(f"INSERT INTO guests VALUES ('{form.username.data}', '{form.email.data}', '{form.password.data}');")            
             db.execute(statement)
             db.commit()
             flash(f'Account created for {form.username.data}!', 'success')
@@ -138,13 +144,12 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         email = session.query(Guests).filter_by(email=f'{form.email.data}',password=f'{form.password.data}').first()
-        
+        print(email)
         if email:
             flash(f'Login Successful for {form.email.data}', 'success')
             return redirect(url_for('home'))
             
         else:
-            #db.rollback()
             flash('Login Unsuccessful. Please check email and password', 'danger')
             return redirect(url_for('login'))
             
@@ -259,7 +264,12 @@ def delete_row():
         db.rollback()
         return Response(str(e), 403)
 
-
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return str(obj)
+        return super().default(obj)
+    
 def generate_table_return_result(res):
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
@@ -289,9 +299,9 @@ def generate_table_return_result(res):
         }
     """
     # ? Returns the stringified JSON object
-    return json.dumps(output)
+    return json.dumps(output, cls=CustomJSONEncoder)
 
-
+    
 def generate_delete_statement(details: Dict):
     # ? Fetches the entry id for the table name
     table_name = details["relationName"]
@@ -371,7 +381,7 @@ def create_app():
 #if __name__ == '__main__':
 #    app.run(debug=True)
 
-PORT = 5000
+PORT = 5001
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
