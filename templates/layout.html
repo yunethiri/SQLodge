@@ -25,14 +25,18 @@
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarToggle">
+            {% if user.is_authenticated %}
             <div class="navbar-nav mr-auto">
-              <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
+              <a class="nav-item nav-link" href="{{ url_for('views.home') }}">Home</a>
+              <a class="nav-item nav-link" href="{{ url_for('views.get_relation') }}">Listings</a>
+              <a class="nav-item nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
             </div>
-            <!-- Navbar Right Side -->
+            {% else %}
             <div class="navbar-nav">
-              <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
-              <a class="nav-item nav-link" href="{{ url_for('register') }}">Register</a>
+              <a class="nav-item nav-link" href="{{ url_for('auth.login') }}">Login</a>
+              <a class="nav-item nav-link" href="{{ url_for('auth.register') }}">Register</a>
             </div>
+            {% endif%}
           </div>
         </div>
       </nav>

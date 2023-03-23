@@ -6,6 +6,7 @@ import json
 # ? request - is the default object used in the flask endpoints to get data from the requests
 # ? Response - is the default HTTP Response object, defining the format of the returned data by this api
 from flask import Flask, request, Response, render_template, url_for, flash, redirect, jsonify
+from flask_login import current_user
 # ? sqlalchemy is the main library we'll use here to interact with PostgresQL DBMS
 import sqlalchemy
 # ? Just a class to help while coding by suggesting methods etc. Can be totally removed if wanted, no change
@@ -75,7 +76,7 @@ posts = [
     },
     {
         'author': 'Jane Doe',
-        'title': '3-storey Townhose',
+        'title': '3-storey Townhouse',
         'content': 'Gym and swimming pool',
         'date_posted': 'April 21, 2018'
     }
@@ -88,8 +89,7 @@ def home():
     return render_template('home.html', posts=posts)
 
 
-@app.route("/")
-@app.get("/listings")
+@app.route("/listings", methods=['GET'])
 def get_relation():
     # ? This method returns the contents of a table whose name (table-name) is given in the url `http://localhost:port/listings?name=listings`
     # ? Below is the default way of parsing the arguments from http url's using flask's request object
@@ -118,6 +118,33 @@ def get_relation():
         # * You may customize it for different exception types, in case you may want
         return Response(str(e), 403)
 
+"""
+@app.route('/booking/<property_id>', methods=['GET', 'POST'])
+def booking(property_id):
+    if request.method == 'POST':
+        # Get the form data
+        guest_email = request.form['guest_email']
+        owner_email = request.form['owner_email']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        
+        # Insert the booking details into the database
+        try:
+            statement = sqlalchemy.text(f"INSERT INTO bookings VALUES (:guest_email, :owner_email, :property_id, :start_date, :end_date)")
+            db.execute(statement, property_id=property_id, guest_email=guest_email, owner_email=owner_email, start_date=start_date, end_date=end_date)
+            db.commit()
+            flash('Your booking has been confirmed!', 'success')
+        except Exception as e:
+            db.rollback()
+            flash(str(e), 'error')
+
+    # Get the details of the property being booked
+    statement = sqlalchemy.text(f"SELECT * FROM PROPERTIES WHERE property_id = :property_id")
+    res = db.execute(statement, property_id=property_id)
+    property_details = res.fetchone()
+
+    return render_template('booking.html', title='Booking', property_details=property_details)
+"""
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -165,9 +192,10 @@ def login():
     return render_template('login.html', title='Login', form=form)
     """
 
-#@app.route("/profile", methods=['GET', 'POST'])
-#def account():
-#    return render_template('profile.html', title='Profile')
+
+@app.route("/profile", methods=['GET', 'POST'])
+def profile():
+    return render_template('profile.html', title='Profile')
 
 """
 @app.get("/table")
@@ -381,7 +409,7 @@ def create_app():
 #if __name__ == '__main__':
 #    app.run(debug=True)
 
-PORT = 5001
+PORT = 5003
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":

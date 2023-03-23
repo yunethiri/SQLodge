@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h1>Book Property {{ property_id }}</h1>
+  <form method="POST" action="{{ url_for('booking', property_id=property_id) }}">
+    <div class="form-group">
+      <label for="checkin">Check-in date:</label>
+      <input type="date" class="form-control" id="checkin" name="checkin" required>
+    </div>
+    <div class="form-group">
+      <label for="checkout">Checkout date:</label>
+      <input type="date" class="form-control" id="checkout" name="checkout" required>
+    </div>
+    <div class="form-group">
+      <label for="guests">Number of guests:</label>
+      <input type="number" class="form-control" id="guests" name="guests" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Book Now</button>
+  </form>
+{% endblock %}

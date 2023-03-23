@@ -1,25 +1,45 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 50%;
+  }
+  
+  td, th {
+    border: 1px solid #5b5b5b;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+</style>
 <table>
   <thead>
     <tr>
-      <th>property_id</th>
-      <th>owner</th>
-      <th>property_name</th>
-      <th>property_type</th>
-      <th>price_per_night</th>
-      <th>zipcode</th>
-      <th>city</th>
-      <th>neighbourhood</th>
-      <th>square_feet</th>
-      <th>accommodates</th>
-      <th>no_of_bathrooms</th>
-      <th>no_of_bedrooms</th>
-      <th>amenities</th>
+      <th>ID</th>
+      <th>Owner</th>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Price/night</th>
+      <th>Zipcode</th>
+      <th>City</th>
+      <th>Neighbourhood</th>
+      <th>Area</th>
+      <th>Accommodates</th>
+      <th>No of Bathrooms</th>
+      <th>No of Bedrooms</th>
+      <th>Amenities</th>
     </tr>
   </thead>
   <tbody>
     {% for row in table_data['rows'] %}
       <tr>
-        <td>{{ row['property_id'] }}</td>
+        <td><a href="#">{{ row['property_id'] }}</a></td>
         <td>{{ row['owner'] }}</td>
         <td>{{ row['property_name'] }}</td>
         <td>{{ row['property_type'] }}</td>
@@ -36,3 +56,4 @@
     {% endfor %}
   </tbody>
 </table>
+{% endblock content %}

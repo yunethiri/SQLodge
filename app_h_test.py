@@ -31,6 +31,7 @@ from flask_login import current_user, login_required, LoginManager, UserMixin
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '52e0e783a4456fdef0c336bbf207eed8'
 
+
 # ? Just enabling the flask app to be able to communicate with any request source
 CORS(app)
 
@@ -86,17 +87,33 @@ posts = [
     }
 ]
 
+login_manager = LoginManager()
+login_manager.login_view = 'auth.login'
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(email):
+    return Guests.query.get(email)
+
 @app.route("/")
 @app.route("/home")
+@login_required
 def home():
-    # ? This method returns the contents of a table whose name (table-name) is given in the url `http://localhost:port/mybookings?name=bookings&email=blabla`
+    return render_template('home.html', posts=posts, user=current_user)
+
+
+@app.route("/")
+@app.get("/listings")
+@login_required
+def get_relation():
+    # ? This method returns the contents of a table whose name (table-name) is given in the url `http://localhost:port/listings?name=listings`
     # ? Below is the default way of parsing the arguments from http url's using flask's request object
-    
+    # relation_name = request.args.get('name', default="", type=str)
     # ? We use try-except statements for exception handling since any wrong query will crash the whole flow
     try:
         # ? Statements are built using f-strings - Python's formatted strings
         # ! Use cursors for better results
-        statement = sqlalchemy.text(f"SELECT * FROM properties;")
+        statement = sqlalchemy.text(f"SELECT * FROM PROPERTIES;")
         # ? Results returned by the DBMS after execution are stored into res object defined in sqlalchemy (for reference)
         res = db.execute(statement)
         # ? committing the statement writes the db state to the disk; note that we use the concept of rollbacks for safe DB management
@@ -104,53 +121,70 @@ def home():
         # ? Data is extracted from the res objects by the custom function for each query case
         # ! Note that you'll have to write custom handling methods for your custom queries
         data = generate_table_return_result(res)
+        data = json.loads(data)
+        #app.logger.debug(data["columns"])
         # ? Response object is instantiated with the formatted data and returned with the success code 200
-        return render_template('home.html', posts=data)
+        return render_template('listings.html', title = 'Listings', table_data = data)
+        #return Response(html_data, 200)
     except Exception as e:
         # ? We're rolling back at any case of failure
         db.rollback()
         # ? At any error case, the error is returned with the code 403, meaning invalid request
         # * You may customize it for different exception types, in case you may want
         return Response(str(e), 403)
-     
 
 
-@app.route("/register", methods=['GET', 'POST'])
-def register():
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        # use attributes from form ie. form.username.data to create query
-        try:
-            statement = sqlalchemy.text(f"INSERT INTO guests VALUES ('{form.username.data}', '{form.email.data}', '{form.password.data}');")
-            db.execute(statement)
-            db.commit()
-            flash(f'Account created for {form.username.data}!', 'success')
-            #return redirect(url_for('home'))
-            return Response(statement.text)
-        except Exception as e:
-            db.rollback()
-            return Response(str(e), 403)
+# @app.route("/register", methods=['GET', 'POST'])
+# def register():
+#     form = RegistrationForm()
+#     if form.validate_on_submit():
+#         try:
+#             statement = sqlalchemy.text(f"INSERT INTO guests VALUES ('{form.username.data}', '{form.email.data}', '{form.password.data}');")            
+#             db.execute(statement)
+#             db.commit()
+#             flash(f'Account created for {form.username.data}!', 'success')
+#             #return redirect(url_for('home'))
+#             flash(f'Account created for {form.username.data}!', 'success')
+#             return redirect(url_for('home'))
+#             #return Response(statement.text)
+#         except Exception as e:
+#             db.rollback()
+#             return Response(str(e), 403)
         
-    return render_template('register.html', title='Register', form=form)
+#     return render_template('register.html', title='Register', form=form)
 
 
-@app.route("/login", methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        try:
-            statement = sqlalchemy.text(f"SELECT * FROM guests g VALUES WHERE g.name ='{form.username.data}' AND g.email = '{form.email.data}' AND g.password = '{form.password.data}');")
-            db.execute(statement)
-            db.commit()
-            return redirect(url_for('home'))
-        except Exception as e:
-            db.rollback()
-            flash('Login Unsuccessful. Please check username and password', 'danger')
-            return Response(str(e), 403)
+# @app.route("/login", methods=['GET', 'POST'])
+# def login():
+#     form = LoginForm()
+#     if form.validate_on_submit():
+#         email = session.query(Guests).filter_by(email=f'{form.email.data}',password=f'{form.password.data}').first()
+#         print(email)
+#         if email:
+#             flash(f'Login Successful for {form.email.data}', 'success')
+#             return redirect(url_for('home'))
             
+#         else:
+#             flash('Login Unsuccessful. Please check email and password', 'danger')
+#             return redirect(url_for('login'))
+            
+#     return render_template('login.html', title='Login', form=form)
+
+    """
+    if form.validate_on_submit():
+        if form.email.data == 'admin@blog.com' and form.password.data == 'password':
+            flash('You have been logged in!', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash('Login Unsuccessful. Please check username and password', 'danger')
     return render_template('login.html', title='Login', form=form)
+    """
 
+#@app.route("/profile", methods=['GET', 'POST'])
+#def account():
+#    return render_template('profile.html', title='Profile')
 
+"""
 @app.get("/table")
 def get_relation():
     # ? This method returns the contents of a table whose name (table-name) is given in the url `http://localhost:port/table?name=table-name`
@@ -176,7 +210,7 @@ def get_relation():
         # ? At any error case, the error is returned with the code 403, meaning invalid request
         # * You may customize it for different exception types, in case you may want
         return Response(str(e), 403)
-
+"""
 
 # ? a flask decorator listening for POST requests at the url /table-create
 @app.post("/table-create")
@@ -245,7 +279,12 @@ def delete_row():
         db.rollback()
         return Response(str(e), 403)
 
-
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return str(obj)
+        return super().default(obj)
+    
 def generate_table_return_result(res):
     # ? An empty Python list to store the entries/rows/tuples of the relation/table
     rows = []
@@ -275,9 +314,9 @@ def generate_table_return_result(res):
         }
     """
     # ? Returns the stringified JSON object
-    return json.dumps(output)
+    return json.dumps(output, cls=CustomJSONEncoder)
 
-
+    
 def generate_delete_statement(details: Dict):
     # ? Fetches the entry id for the table name
     table_name = details["relationName"]
@@ -351,14 +390,21 @@ def generate_create_table_statement(table: Dict):
 
 # ? This method can be used by waitress-serve CLI 
 def create_app():
-   return app
+    from .auth import auth
 
-# ? The port where the debuggable DB management API is served
+    app.register_blueprint(auth, url_prefix='/')
+    return app
+
+
+
+#if __name__ == '__main__':
+#    app.run(debug=True)
+
 PORT = 5000
 # ? Running the flask app on the localhost/0.0.0.0, port 2222
 # ? Note that you may change the port, then update it in the view application too to make it work (don't if you don't have another application occupying it)
 if __name__ == "__main__":
-    app.run("0.0.0.0", PORT)
+    app.run("0.0.0.0", PORT, debug=True)
     # ? Uncomment the below lines and comment the above lines below `if __name__ == "__main__":` in order to run on the production server
     # ? Note that you may have to install waitress running `pip install waitress`
     # ? If you are willing to use waitress-serve command, please add `/home/sadm/.local/bin` to your ~/.bashrc
