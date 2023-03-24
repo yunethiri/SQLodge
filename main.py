@@ -7,4 +7,4 @@ CORS(app)
 
 PORT = 5012
 
-app.run("0.0.0.0", PORT, debug=True)
+app.run("0.0.0.0", PORT, debug=False)

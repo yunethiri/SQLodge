@@ -56,8 +56,6 @@ Owners = Base.classes.owners
 Properties = Base.classes.properties
 Bookings = Base.classes.bookings
 
-
-
 # ? A dictionary containing
 data_types = {
     'boolean': 'BOOL',

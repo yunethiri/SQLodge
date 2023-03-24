@@ -50,6 +50,8 @@ def register():
                     statement = sqlalchemy.text(f"INSERT INTO guests VALUES ('{form.username.data}', '{form.email.data}', '{form.password.data}');")            
                     db.execute(statement)
                     db.commit()
+                    
+                    guest = session.query(Guests).filter_by(email=f'{form.email.data}',password=f'{form.password.data}').first()
                     login_user(guest, remember=True)
                     flash(f'Account created for {form.username.data}!', 'success')
                     return redirect(url_for('views.home'))

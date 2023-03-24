@@ -1,17 +1,22 @@
-from flask import request, Response, render_template, Blueprint
+from flask import request, Response, render_template, Blueprint, flash, url_for, redirect
 from flask_login import login_required, current_user
 import sqlalchemy
 import json
 from models import db
 from decimal import Decimal
 from typing import Dict
+from forms import UpdateAccountForm, BookingForm
+from models import session, Guests, Properties
+from flask_admin import BaseView, expose
+from datetime import datetime
+from sqlalchemy import and_
 
 posts = [
     {
         'author': 'ADMINS',
         'title': 'WELCOME',
         'content': 'WELCOME AGAIN',
-        'date_posted': 'March 24, 2023 2359 tyvm'
+        'date_posted': 'March 24, 2023'
     }
 ]
 
@@ -35,10 +40,79 @@ def get_relation():
         data = generate_table_return_result(res)
         data = json.loads(data)
         return render_template('listings.html', title = 'Listings', table_data=data, user=current_user)
-        #return Response(html_data, 200)
     except Exception as e:
         db.rollback()
         return Response(str(e), 403)
+
+
+@views.route('/booking', methods=['GET', 'POST'])
+@login_required
+def booking():
+    form = BookingForm()
+    if form.validate_on_submit():
+        property = session.query(Properties).filter(and_(Properties.owner==f'{form.owner_email.data}', Properties.property_id==f'{form.property_id.data}')).all()
+        guest = session.query(Guests).filter_by(email=f'{form.guest_email.data}').first()
+        if property and guest:
+            start_date= form.start_date.data
+            end_date = form.end_date.data
+            # Check that the start date is not earlier than today's date
+            if start_date < datetime.now().date():
+                flash('Start date cannot be earlier than today.', category='error')
+                return redirect(url_for('views.booking'))
+            
+            # Check that the end date is not earlier than the start date
+            if end_date < start_date:
+                flash('End date cannot be earlier than start date.', category='error')
+                return redirect(url_for('views.booking'))
+            
+            duration = end_date - start_date
+            days = duration.days
+            # Insert the booking details into the database
+            try:
+                statement = sqlalchemy.text(f"INSERT INTO bookings VALUES ('{form.guest_email.data}', '{form.owner_email.data}', '{form.property_id.data}', '{form.start_date.data}',  '{form.end_date.data}', {days});")
+                db.execute(statement)
+                db.commit()
+                flash('Your booking has been confirmed!', 'success')
+                return redirect(url_for('views.booking'))
+            except Exception as e:
+                db.rollback()
+                flash(str(e), 'error')
+        else:
+            if not guest:
+                flash('Your email is not registered.', category='error')
+                return redirect(url_for('views.booking'))
+            else:
+                flash('The host/property is not valid.', category='error')
+                return redirect(url_for('views.booking'))
+    
+    return render_template('booking.html', title='Booking', form = form, user=current_user)
+
+    
+@views.route("/profile", methods=['GET', 'POST'])
+@login_required
+def profile():
+    form = UpdateAccountForm()
+    if form.validate_on_submit():
+        if form.email.data != current_user.email:
+            guest = session.query(Guests).filter_by(email=f'{form.email.data}').first()
+            if guest:
+                flash('That email is taken. Please choose a different one.', category='error')
+                return redirect(url_for('views.profile'))
+            else:
+                try:
+                    statement = sqlalchemy.text(f"UPDATE guests SET email = '{form.email.data}' WHERE email = '{current_user.email}';")         
+                    db.execute(statement)
+                    db.commit()
+
+                    guest = session.query(Guests).filter_by(email=f'{form.email.data}').first()
+                    flash('Your account has been updated! Please log in again.', 'success')
+                    return redirect(url_for('views.profile'))
+                except Exception as e:
+                    db.rollback()
+                    return Response(str(e), 403)
+    return render_template('profile.html', title='Profile', form=form, user=current_user)
+
+
 
 # ? a flask decorator listening for POST requests at the url /table-create
 @views.post("/table-create")
