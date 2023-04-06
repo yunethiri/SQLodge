@@ -1,11 +1,11 @@
-CREATE TABLE IF NOT EXISTS guests (
-    name VARCHAR(32) NOT NULL,
-    email VARCHAR(50) PRIMARY KEY,
-    password VARCHAR(16) NOT NULL,
-    credit_card_no VARCHAR(20)
-);
+-- CREATE TABLE IF NOT EXISTS guests (
+--     name VARCHAR(32) NOT NULL,
+--     email VARCHAR(50) PRIMARY KEY,
+--     password VARCHAR(16) NOT NULL,
+--     credit_card_no VARCHAR(20)
+-- );
 
-CREATE TABLE IF NOT EXISTS owners (
+CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(32) NOT NULL,
     email VARCHAR(50) PRIMARY KEY,
     password VARCHAR(16) NOT NULL
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS properties (
     no_of_bedrooms INTEGER,
     amenities VARCHAR(1000),
 
-    FOREIGN KEY (owner) REFERENCES owners (email) ON UPDATE CASCADE ON DELETE CASCADE
+    FOREIGN KEY (owner) REFERENCES users (email) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
 CREATE TABLE IF NOT EXISTS bookings (
@@ -37,51 +37,53 @@ CREATE TABLE IF NOT EXISTS bookings (
     end_date DATE NOT NULL,
     duration NUMERIC,
 
-    FOREIGN KEY (guest_email) REFERENCES guests (email) ON UPDATE CASCADE ON DELETE CASCADE, 
-    FOREIGN KEY (owner_email) REFERENCES owners (email) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (guest_email) REFERENCES users (email) ON UPDATE CASCADE ON DELETE CASCADE, 
+    FOREIGN KEY (owner_email) REFERENCES users (email) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (property_id) REFERENCES properties (property_id) ON UPDATE CASCADE ON DELETE CASCADE,
 
-    PRIMARY KEY (owner_email, property_id, start_date)
+    PRIMARY KEY (property_id, start_date),
+    CHECK (guest_email != owner_email), 
+    CHECK (start_date < end_date)
 );
 
-CREATE TABLE wishlist (
-    guest_email VARCHAR(50),
-    property_id INTEGER,
+-- CREATE TABLE wishlist (
+--     guest_email VARCHAR(50),
+--     property_id INTEGER,
 
-    FOREIGN KEY (guest_email) REFERENCES guests (email) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (property_id) REFERENCES properties (property_id),
+--     FOREIGN KEY (guest_email) REFERENCES guests (email) ON UPDATE CASCADE ON DELETE CASCADE,
+--     FOREIGN KEY (property_id) REFERENCES properties (property_id),
 
-    PRIMARY KEY (guest_email, property_id)
-);
+--     PRIMARY KEY (guest_email, property_id)
+-- );
 
-CREATE TABLE owner_review (
-    reviewer_email VARCHAR(50),
-    owner_email VARCHAR(50),
-    owner_rating NUMERIC(1) CHECK (owner_rating <=5 AND owner_rating >= 0),
-    date_reviewed DATE NOT NULL,
-    FOREIGN KEY (reviewer_email) REFERENCES guests (email) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (owner_email) REFERENCES owners (email) ON UPDATE CASCADE ON DELETE CASCADE,
-    PRIMARY KEY (reviewer_email, owner_email)
-);
-
-
-CREATE TABLE guest_review (
-    reviewer_email VARCHAR(50),
-    guest_email VARCHAR(50),
-    guest_rating NUMERIC(1) CHECK (guest_rating <=5 AND guest_rating >= 0),
-    date_reviewed DATE NOT NULL,
-    FOREIGN KEY (reviewer_email) REFERENCES owners (email) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (guest_email) REFERENCES guests (email) ON UPDATE CASCADE ON DELETE CASCADE,
-    PRIMARY KEY (reviewer_email, guest_email)
-);
+-- CREATE TABLE owner_review (
+--     reviewer_email VARCHAR(50),
+--     owner_email VARCHAR(50),
+--     owner_rating NUMERIC(1) CHECK (owner_rating <=5 AND owner_rating >= 0),
+--     date_reviewed DATE NOT NULL,
+--     FOREIGN KEY (reviewer_email) REFERENCES guests (email) ON UPDATE CASCADE ON DELETE CASCADE,
+--     FOREIGN KEY (owner_email) REFERENCES users (email) ON UPDATE CASCADE ON DELETE CASCADE,
+--     PRIMARY KEY (reviewer_email, owner_email)
+-- );
 
 
-CREATE TABLE property_review (
-    reviewer_email VARCHAR(50),
-    property_id INTEGER,
-    property_rating NUMERIC(1) CHECK (property_rating <=5 AND property_rating >= 0),
-    date_reviewed DATE NOT NULL,
-    FOREIGN KEY (reviewer_email) REFERENCES guests (email) ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (property_id) REFERENCES properties (property_id) ON UPDATE CASCADE ON DELETE CASCADE,
-    PRIMARY KEY (reviewer_email, property_id)
-);
+-- CREATE TABLE guest_review (
+--     reviewer_email VARCHAR(50),
+--     guest_email VARCHAR(50),
+--     guest_rating NUMERIC(1) CHECK (guest_rating <=5 AND guest_rating >= 0),
+--     date_reviewed DATE NOT NULL,
+--     FOREIGN KEY (reviewer_email) REFERENCES users (email) ON UPDATE CASCADE ON DELETE CASCADE,
+--     FOREIGN KEY (guest_email) REFERENCES guests (email) ON UPDATE CASCADE ON DELETE CASCADE,
+--     PRIMARY KEY (reviewer_email, guest_email)
+-- );
+
+
+-- CREATE TABLE property_review (
+--     reviewer_email VARCHAR(50),
+--     property_id INTEGER,
+--     property_rating NUMERIC(1) CHECK (property_rating <=5 AND property_rating >= 0),
+--     date_reviewed DATE NOT NULL,
+--     FOREIGN KEY (reviewer_email) REFERENCES guests (email) ON UPDATE CASCADE ON DELETE CASCADE,
+--     FOREIGN KEY (property_id) REFERENCES properties (property_id) ON UPDATE CASCADE ON DELETE CASCADE,
+--     PRIMARY KEY (reviewer_email, property_id)
+-- );

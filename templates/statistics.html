@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+{% block content %}
+<style>
+  table {
+    font-family: Arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  th {
+    text-align: left;
+    background-color: #f2f2f2;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .btn-book {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+  }
+  
+  .btn-book:hover {
+    background-color: #0062cc;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+</style>
+<div class="container">
+  <form method="POST" action="{{ url_for('views.statistics') }}">
+    {{ form.csrf_token }}
+    <h1>Enter your email to view your statistics: </h1>
+    <p class="text-secondary">
+      No statistics will be shown for most popular property and
+      total revenue if your properties have never been booked.
+    </p>
+    <div class="form-group">
+      {{ form.email.label }}
+      {{ form.email }}
+    </div>
+    <div class="form-group">
+      {{ form.submit }}
+    </div>
+  </form>
+  <h1>Your Most Popular Property</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Property ID</th>
+        <th>Booking Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in stats_data['rows'] %}
+        <tr>
+          <td>{{ row['property_id'] }}</td>
+          <td>{{ row['count'] }}</td>
+        </tr >
+      {% endfor %}
+    </tbody>
+  </table>
+  <h1>Your Property Distribution</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Neighbourhood</th>
+        <th>Number of Properties</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in stats_data1['rows'] %}
+        <tr>
+          <td>{{ row['neighbourhood'] }}</td>
+          <td>{{ row['count'] }}</td>
+        </tr >
+      {% endfor %}
+    </tbody>
+  </table>
+  <h1>Your Total Revenue</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Total Revenue</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in stats_data2['rows'] %}
+        <tr>
+          <td>{{ row['sum'] }}</td>
+        </tr >
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock content %}

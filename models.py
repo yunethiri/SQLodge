@@ -5,9 +5,10 @@ from flask_login import UserMixin
 
 
 YOUR_POSTGRES_PASSWORD = "postgres"
-connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost/postgres"
+port = 5432
+connection_string = f"postgresql://postgres:{YOUR_POSTGRES_PASSWORD}@localhost:{port}/postgres"
 engine = sqlalchemy.create_engine(
-    "postgresql://postgres:postgres@localhost/postgres"
+    f"postgresql://postgres:postgres@localhost:{port}/postgres"
 )
 
 db = engine.connect()
@@ -21,8 +22,6 @@ class NewUserMixin(UserMixin):
 Base = automap_base(cls=NewUserMixin)
 Base.prepare(autoload_with=engine)
 
-
-Guests = Base.classes.guests
-Owners = Base.classes.owners    
+Users = Base.classes.users    
 Properties = Base.classes.properties
 Bookings = Base.classes.bookings

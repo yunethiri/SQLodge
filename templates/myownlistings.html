@@ -38,33 +38,7 @@
   }
 </style>
 <div class="container">
-  <form method="POST" action="{{ url_for('views.get_relation') }}">
-    {{ form.csrf_token }}
-    <div class="form-group">
-      <label>{{ form.property_type.label }}</label>
-      {{ form.property_type }}
-    </div>
-    <div class="form-group">
-      <label>{{ form.min_price.label }}</label>
-      {{ form.min_price }}
-    </div>
-    <div class="form-group">
-      <label>{{ form.max_price.label }}</label>
-      {{ form.max_price }}
-    </div>
-    <div class="form-group">
-      <label>Neighbourhood</label>
-      {{ form.neighbourhood }}
-      <span> Except </span>
-      {{ form.except_neighbourhood }}
-    </div>
-    <div class="form-group">
-      <label>{{ form.sort_by.label }}</label>
-      {{ form.sort_by }}
-    </div>
-    <div class="form-group">{{ form.submit }}</div>
-  </form>
-  <h1>Click Property ID to book</h1>
+  <h1>Click Property ID to update</h1>
   <table class="table">
     <thead>
       <tr>
@@ -72,7 +46,7 @@
         <th>Owner</th>
         <th>Name</th>
         <th>Type</th>
-        <th>Price Per Night</th>
+        <th>Price per Night</th>
         <th>Location</th>
         <th>Size</th>
         <th>Accommodates</th>
@@ -84,7 +58,7 @@
       {% for row in table_data['rows'] %}
       <tr>
         <td>
-          <a href="/booking?property_id={{ row['property_id'] }}"
+          <a href="/updatemylistings?property_id={{ row['property_id'] }}"
             >{{ row['property_id'] }}</a
           >
         </td>
@@ -98,6 +72,14 @@
         <td>{{ row['square_feet'] }}</td>
         <td>{{ row['accomodates'] }}</td>
         <td>{{ row['amenities'] }}</td>
+        <td>
+          <form
+            method="post"
+            action="{{ url_for('views.delete_entry', id=row['property_id']) }}"
+          >
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+        </td>
       </tr>
       {% endfor %}
     </tbody>

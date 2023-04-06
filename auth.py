@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_user, login_required, logout_user, current_user
 from forms import LoginForm, RegistrationForm
-from models import session, Guests
+from models import session, Users
 from flask import request, Response, render_template, url_for, flash, redirect
 import sqlalchemy
+import logging
+
 engine = sqlalchemy.create_engine(
     "postgresql://postgres:postgres@localhost/postgres"
 )
@@ -16,13 +18,14 @@ def login():
     form = LoginForm()
     if request.method == 'POST':
         if form.validate_on_submit():
-            guest = session.query(Guests).filter_by(email=f'{form.email.data}',password=f'{form.password.data}').first()
-            print(guest)
-            if guest:
+            user = session.query(Users).filter_by(email=f'{form.email.data}',password=f'{form.password.data}').first()
+            #statement = sqlalchemy.text(f"SELECT * FROM users WHERE email='{form.email.data}' AND password='{form.password.data}';")
+            #guest = session.execute(statement).first()
+            logging.warning(user)
+            if user:
                 flash(f'Login Successful for {form.email.data}', 'success')
-                login_user(guest, remember=True)
+                login_user(user, remember=True)
                 return redirect(url_for('views.home'))
-                
             else:
                 flash('Login Unsuccessful. Please check email and password', 'danger')
                 return redirect(url_for('auth.login'))
@@ -38,21 +41,26 @@ def logout():
 @auth.route("/register", methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
+    user = None
     if request.method == 'POST':
         if form.validate_on_submit():
-            guest = session.query(Guests).filter_by(email=f'{form.email.data}',password=f'{form.password.data}').first()
-            if guest:
+            #user = session.query(Users).filter_by(email=f'{form.email.data}',password=f'{form.password.data}').first()
+            statement = sqlalchemy.text(f"SELECT * FROM users WHERE email='{form.email.data}' AND password='{form.password.data}';")
+            user = session.execute(statement).first()
+            if user:
                 flash('Email already exists.', category='error')
                 return redirect(url_for('auth.register'))
             
             else:
                 try:
-                    statement = sqlalchemy.text(f"INSERT INTO guests VALUES ('{form.username.data}', '{form.email.data}', '{form.password.data}');")            
+                    statement = sqlalchemy.text(f"INSERT INTO users VALUES ('{form.username.data}', '{form.email.data}', '{form.password.data}');")            
                     db.execute(statement)
                     db.commit()
                     
-                    guest = session.query(Guests).filter_by(email=f'{form.email.data}',password=f'{form.password.data}').first()
-                    login_user(guest, remember=True)
+                    user = session.query(Users).filter_by(email=f'{form.email.data}',password=f'{form.password.data}').first()
+                    #statement = sqlalchemy.text(f"SELECT * FROM users WHERE email='{form.email.data}' AND password='{form.password.data}';")
+                    #user = session.execute(statement).first()
+                    login_user(user, remember=True)
                     flash(f'Account created for {form.username.data}!', 'success')
                     return redirect(url_for('views.home'))
                 except Exception as e:

@@ -2,7 +2,7 @@ from flask import Flask
 from json2html import *
 from flask_login import LoginManager
 from flask_admin import Admin
-from models import Guests, session
+from models import Users, Properties, Bookings, session
 from flask_admin import Admin, BaseView, expose
 from flask_admin.contrib.sqla import ModelView
 
@@ -22,10 +22,12 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(email):
-        return session.query(Guests).get(email)
+        return session.query(Users).get(email)
     
     admin = Admin(app, template_mode="bootstrap4")
-    admin.add_view(ModelView(Guests, session))
+    admin.add_view(ModelView(Users, session))
+    admin.add_view(ModelView(Properties, session))
+    admin.add_view(ModelView(Bookings, session))
 
     class MyView(BaseView):
         @expose("/")
@@ -41,7 +43,3 @@ data_types = {
     'text': 'TEXT',
     'time': 'TIME',
 }
-
-
-
-

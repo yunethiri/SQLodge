@@ -30,6 +30,8 @@
               <a class="nav-item nav-link" href="{{ url_for('views.home') }}">Home</a>
               <a class="nav-item nav-link" href="{{ url_for('views.get_relation') }}">Listings</a>
               <a class="nav-item nav-link" href="{{ url_for('views.profile') }}">Profile</a>
+              <a class="nav-item nav-link" href="{{ url_for('views.get_my_listings') }}">My Listings</a>
+              <a class="nav-item nav-link" href="{{ url_for('views.statistics') }}">My Statistics</a>
               <a class="nav-item nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
             </div>
             {% else %}
