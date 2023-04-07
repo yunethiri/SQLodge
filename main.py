@@ -5,6 +5,6 @@ app = create_app()
 
 CORS(app)
 
-PORT = 5016
+PORT = 5018
 
 app.run("0.0.0.0", PORT, debug=True)
