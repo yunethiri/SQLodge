@@ -4,7 +4,6 @@ from forms import LoginForm, RegistrationForm
 from models import session, Users
 from flask import request, Response, render_template, url_for, flash, redirect
 import sqlalchemy
-import logging
 
 engine = sqlalchemy.create_engine(
     "postgresql://postgres:postgres@localhost/postgres"
@@ -21,7 +20,6 @@ def login():
             user = session.query(Users).filter_by(email=f'{form.email.data}',password=f'{form.password.data}').first()
             #statement = sqlalchemy.text(f"SELECT * FROM users WHERE email='{form.email.data}' AND password='{form.password.data}';")
             #guest = session.execute(statement).first()
-            logging.warning(user)
             if user:
                 flash(f'Login Successful for {form.email.data}', 'success')
                 login_user(user, remember=True)

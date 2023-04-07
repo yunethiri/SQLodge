@@ -34,10 +34,11 @@
   }
 
   h1 {
-    font-size: 28px;
+    font-size: 26px;
   }
 </style>
 <div class="container">
+  <h1>Fill in all fields to use filter function!</h1>
   <form method="POST" action="{{ url_for('views.get_relation') }}">
     {{ form.csrf_token }}
     <div class="form-group">
@@ -59,8 +60,12 @@
       {{ form.except_neighbourhood }}
     </div>
     <div class="form-group">
-      <label>{{ form.sort_by.label }}</label>
-      {{ form.sort_by }}
+      <label>{{ form.price_sort_by.label }}</label>
+      {{ form.price_sort_by }}
+    </div>
+    <div class="form-group">
+      <label>{{ form.bookings_sort_by.label }}</label>
+      {{ form.bookings_sort_by }}
     </div>
     <div class="form-group">{{ form.submit }}</div>
   </form>

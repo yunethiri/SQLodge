@@ -6,11 +6,7 @@ from models import db
 from decimal import Decimal
 from typing import Dict
 from forms import UpdateAccountForm, BookingForm, FilterForm, UpdatePropertiesForm, StatsForm
-from models import session, Users, Properties
-from flask_admin import BaseView, expose
 from datetime import datetime
-from sqlalchemy import and_
-import logging
 
 posts = [
     {
@@ -46,32 +42,29 @@ def get_relation():
             max_price = form.max_price.data
             neighbourhood = form.neighbourhood.data
             except_neighbourhood = form.except_neighbourhood.data
-            sort_by = form.sort_by.data
+            price_sort_by = form.price_sort_by.data
+            bookings_sort_by = form.bookings_sort_by.data
             
-            statement = f"SELECT * FROM PROPERTIES"
+            statement = "SELECT p.* FROM properties p, bookings b WHERE b.property_id = p.property_id AND b.owner_email = p.owner"
             if property_type:
-                if (property_type == 'None'):
-                    statement += f" INTERSECT (SELECT * from properties WHERE property_type !='{property_type}')"
-                elif (property_type == 'Others'):
-                    statement += f" INTERSECT (SELECT * from properties WHERE property_type NOT IN ('House', 'Apartment', 'Condominium'))"
-                else:
-                    statement += f" INTERSECT (SELECT * from properties WHERE property_type ='{property_type}')"
+                if (property_type == 'Others'):
+                    statement += f" AND p.property_type NOT IN ('House', 'Apartment', 'Condominium')"
+                elif (property_type != 'None'):
+                    statement += f" AND p.property_type ='{property_type}'"
             if min_price:
-                statement += f" INTERSECT (SELECT * from properties WHERE price_per_night >= {min_price})"
+                statement += f" AND p.price_per_night >= {min_price}"
             if max_price:
-                statement += f" INTERSECT (SELECT * from properties WHERE price_per_night <= {max_price})"
+                statement += f" AND p.price_per_night <= {max_price}"
             if neighbourhood:
-                if (neighbourhood == 'None'):
-                    statement += f" INTERSECT (SELECT * from properties WHERE neighbourhood !='{neighbourhood}')"
-                else:
-                    statement += f" INTERSECT (SELECT * from properties WHERE neighbourhood ='{neighbourhood}')"
+                if (neighbourhood != 'All'):
+                    statement += f" AND p.neighbourhood ='{neighbourhood}'"
             if except_neighbourhood:
-                if (except_neighbourhood == 'None'):
-                    statement += f" INTERSECT (SELECT * from properties WHERE neighbourhood !='{except_neighbourhood}')"
-                else:
-                    statement += f" EXCEPT (SELECT * from properties WHERE neighbourhood ='{except_neighbourhood}')"
-            if sort_by:
-                statement += f" ORDER BY price_per_night {sort_by}"
+                if (except_neighbourhood != 'None'):
+                    statement += f" AND p.neighbourhood !='{except_neighbourhood}'"
+            if bookings_sort_by:
+                statement += f" GROUP BY p.property_id ORDER BY COUNT(*) {bookings_sort_by}"
+            if price_sort_by:
+                statement += f" , price_per_night {price_sort_by}" 
     
             statement = sqlalchemy.text(statement)
             listings = db.execute(statement)
@@ -106,7 +99,7 @@ def update_listings():
 
     if request.method == 'POST' and form.validate_on_submit():
         try:
-            statement = sqlalchemy.text(f"UPDATE properties SET price_per_night = '{form.price_per_night.data}', accomodates  = '{form.accommodates.data}', amenities = '{form.amenities.data}' WHERE property_id = '{form.property_id.data}';")
+            statement = sqlalchemy.text(f"UPDATE properties SET price_per_night = '{form.price_per_night.data}', accomodates  = '{form.accommodates.data}',  amenities = '{form.amenities.data}' WHERE property_id = '{form.property_id.data}';")
             db.execute(statement)
             db.commit()
             flash('Your listing has been updated!', 'success')
@@ -137,9 +130,7 @@ def delete_entry():
 @login_required
 def booking():
     form = BookingForm()
-    property, users = None, None
     property_id = request.args.get('property_id')
-    logging.warning(property_id)
     form.property_id.data = property_id
     statement = sqlalchemy.text(f"SELECT owner FROM PROPERTIES WHERE property_id = '{form.property_id.data}' ;")
     res = db.execute(statement)
@@ -159,13 +150,11 @@ def booking():
             # Check that the start date is not earlier than today's date
             if start_date < datetime.now().date():
                 flash('Start date cannot be earlier than today.', category='error')
-                #return redirect(url_for('views.booking'))
                 return redirect(f"/booking?property_id={form.property_id.data}")
             
             # Check that the end date is not earlier than the start date
             if end_date < start_date:
                 flash('End date cannot be earlier than start date.', category='error')
-                #return redirect(url_for('views.booking'))
                 return redirect(f"/booking?property_id={form.property_id.data}")
             
             # Check that booking dates do not overlap with existing bookings
@@ -173,7 +162,6 @@ def booking():
             conflict_booking = db.execute(statement).fetchall()
             if conflict_booking:
                 flash('Booking dates conflict with another booking on this property.', category='error')
-                #return redirect(url_for('views.booking'))
                 return redirect(f"/booking?property_id={form.property_id.data}")
             duration = end_date - start_date
             days = duration.days
@@ -192,67 +180,6 @@ def booking():
             return redirect(f"/booking?property_id={form.property_id.data}")
     return render_template('booking.html', title='Booking', form = form, user=current_user)
 
-    
-# @views.route("/profile", methods=['GET', 'POST'])
-# @login_required
-# def profile():
-#     form = UpdateAccountForm()
-#     if form.validate_on_submit():
-#         if form.email.data != current_user.email:
-#             #guest = session.query(users).filter_by(email=f'{form.email.data}').first()
-#             statement = sqlalchemy.text(f"SELECT * FROM users u WHERE u.email='{form.email.data}';")
-#             guest = db.execute(statement).fetchone()
-#             db.commit()
-#             if guest:
-#                 guest = generate_table_return_result(guest)
-#                 guest = json.loads(guest)
-#                 flash('That email is taken. Please choose a different one.', category='error')
-#                 return redirect(url_for('views.profile'))
-#             else:
-#                 try:
-#                     statement = sqlalchemy.text(f"UPDATE users u SET u.email = '{form.email.data}' WHERE u.email = '{current_user.email}';")       
-#                     db.execute(statement)
-#                     db.commit()
-
-#                     #guest = session.query(users).filter_by(email=f'{form.email.data}').first()
-#                     statement = sqlalchemy.text(f"SELECT * FROM users g WHERE g.email='{form.email.data}';")
-#                     guest = db.execute(statement)
-#                     db.commit()
-#                     guest = generate_table_return_result(guest)
-#                     guest = json.loads(guest)
-                    
-#                     flash('Your account has been updated! Please log in again.', 'success')
-#                     return redirect(url_for('auth.login'))
-#                 except Exception as e:
-#                     db.rollback()
-#                     return Response(str(e), 403)
-#         if form.name.data != current_user.name:
-#             statement = sqlalchemy.text(f"SELECT * FROM users u WHERE u.name='{form.name.data}';")
-#             guest = db.execute(statement).fetchone()
-#             db.commit()
-#             if guest:
-#                 guest = generate_table_return_result(guest)
-#                 guest = json.loads(guest)
-#                 flash('That name is taken. Please choose a different one.', category='error')
-#                 return redirect(url_for('views.profile'))
-#             else:
-#                 try:
-#                     statement = sqlalchemy.text(f"UPDATE users SET name = '{form.name.data}' WHERE email = '{current_user.email}';")       
-#                     db.execute(statement)
-#                     db.commit()
-
-#                     statement = sqlalchemy.text(f"SELECT * FROM users g WHERE g.name='{form.name.data}';")
-#                     guest = db.execute(statement)
-#                     db.commit()
-#                     guest = generate_table_return_result(guest)
-#                     guest = json.loads(guest)
-
-#                     flash('Your name has been updated! Please log in again.', 'success')
-#                     return redirect(url_for('auth.login'))
-#                 except Exception as e:
-#                     db.rollback()
-#                     return Response(str(e), 403)
-#     return render_template('profile.html', title='Profile', form=form, user=current_user)
 
 @views.route("/profile", methods=['GET', 'POST'])
 @login_required
@@ -263,7 +190,6 @@ def profile():
             statement = sqlalchemy.text(f"SELECT * FROM users u WHERE u.email='{form.email.data}';")
             guest = db.execute(statement).fetchone()
             db.commit()
-            logging.warning(guest)
             if guest:
                 flash('That email is taken. Please choose a different one.', category='error')
                 return redirect(url_for('views.profile'))
@@ -279,12 +205,20 @@ def profile():
             statement = sqlalchemy.text(f"UPDATE users SET email = '{form.email.data}', name = '{form.name.data}' WHERE email = '{current_user.email}';")       
             db.execute(statement)
             db.commit()
+
+            statement = sqlalchemy.text(f"SELECT * FROM users g WHERE g.name='{form.name.data}' AND g.email='{form.email.data}';")
+            guest = db.execute(statement)
+            db.commit()
+            guest = generate_table_return_result(guest)
+            guest = json.loads(guest)
+
             flash('Your account has been updated! Please log in again.', 'success')
             return redirect(url_for('auth.logout'))
         except Exception as e:
             db.rollback()
             return Response(str(e), 403)
     return render_template('profile.html', title='Profile', form=form, user=current_user)
+
 
 @views.route("/")
 @views.route("/statistics", methods=["GET", "POST"])
@@ -298,7 +232,6 @@ def statistics():
             res = db.execute(statement)
             data = generate_table_return_result(res)
             data = json.loads(data)
-            logging.warning(data)
 
             statement = sqlalchemy.text(f"SELECT neighbourhood, COUNT(*) as count FROM properties WHERE owner = '{form.email.data}' GROUP BY neighbourhood;")
             res = db.execute(statement)
