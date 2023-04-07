@@ -99,7 +99,6 @@ def get_my_listings():
         db.rollback()
         return Response(str(e), 403)
 
-# it works now! even the 'no change' part works
 @views.route('/updatemylistings', methods=['GET', 'POST'])
 @login_required
 def update_listings():
