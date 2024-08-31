@@ -6,6 +6,8 @@ SQLodge is a functional accommodation booking platform developed as part of a gr
 
 The platform enables users to create accounts, browse and book accommodations with advanced filters and sorting, manage their own listings, and configure user profiles and settings. Additionally, the platform includes an administration interface for managing user data and listings.
 
+More information, including the ER Diagram for the database, is found in IT2002_Report.pdf.
+
 ## Key Features
 
 1. Account creation and login
@@ -50,10 +52,8 @@ Visit `http://localhost:5016` in your web browser.
 
 Log in with the following email and password to test out functionalities:
 
-#### Email: 
-alevett65@wufoo.com 	
-#### Password: 
-NOOlabAC
+Email: `alevett65@wufoo.com`
+Password: `NOOlabAC`
 
 ## Additional Notes
 
