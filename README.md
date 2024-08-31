@@ -26,7 +26,7 @@ The initial dataset was generated from the San Diego Airbnb Listings found on Ka
 
 Additional data was generated using Mockaroo to simulate guest profiles and bookings. 
 
-## Running the Model
+## Running the Application
 
 To run the model, follow these steps:
 
@@ -45,6 +45,19 @@ python main.py
 #### Access the Platform:
 
 Visit `http://localhost:5016` in your web browser.
+
+## Usage
+
+Log in with the following email and password to test out functionalities:
+
+#### Email: 
+alevett65@wufoo.com 	
+#### Password: 
+NOOlabAC
+
+## Additional Notes
+
+If you encounter any issues or have suggestions, please refer to Issues section or submit a pull request. 
 
 
 
